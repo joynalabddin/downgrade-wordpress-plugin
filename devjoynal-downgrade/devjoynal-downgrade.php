@@ -3,7 +3,7 @@
  * Plugin Name: DevJoynal Downgrade
  * Plugin URI: https://devjoynal.com
  * Description: Safely pin WordPress Core to an exact release for controlled rollback, compatibility testing, reinstall, or upgrade workflows.
- * Version: 2.0.3
+ * Version: 2.0.4
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Tested up to: 7.1
@@ -16,18 +16,19 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'DOWNGRADE_VERSION', '2.0.3' );
+define( 'DOWNGRADE_VERSION', '2.0.4' );
 define( 'DOWNGRADE_OPTION_VERSION', 'wpdg_specific_version_name' );
 define( 'DOWNGRADE_OPTION_URL', 'wpdg_download_url' );
 define( 'DOWNGRADE_OPTION_CUSTOM_URL', 'wpdg_edit_download_url' );
+define( 'DOWNGRADE_OPTION_SHA256', 'wpdg_download_sha256' );
 
 add_action( 'plugins_loaded', 'downgrade_load_textdomain' );
 add_action( 'admin_menu', 'downgrade_register_menu' );
 add_action( 'admin_init', 'downgrade_register_settings' );
 add_action( 'admin_init', 'downgrade_handle_reset' );
+add_filter( 'upgrader_pre_download', 'downgrade_verify_custom_package', 10, 3 );
 add_action( 'admin_enqueue_scripts', 'downgrade_enqueue_admin_assets' );
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'downgrade_plugin_action_links' );
-add_filter( 'pre_site_option_update_core', 'downgrade_filter_core_updates' );
 add_filter( 'site_transient_update_core', 'downgrade_filter_core_updates' );
 add_filter( 'plugins_api_result', 'downgrade_plugin_information_result', 10, 3 );
 
@@ -77,6 +78,15 @@ function downgrade_register_settings() {
 			'default'           => false,
 		)
 	);
+	register_setting(
+		'wpdg-settings-group',
+		DOWNGRADE_OPTION_SHA256,
+		array(
+			'type'              => 'string',
+			'sanitize_callback' => 'downgrade_sanitize_sha256',
+			'default'           => '',
+		)
+	);
 }
 
 /** Validate a WordPress version without accepting arbitrary strings. */
@@ -108,6 +118,18 @@ function downgrade_sanitize_url( $value ) {
 
 function downgrade_sanitize_boolean( $value ) {
 	return in_array( (string) $value, array( '1', 'true', 'on' ), true );
+}
+/** Accept an optional SHA-256 digest for custom package verification. */
+function downgrade_sanitize_sha256( $value ) {
+	$value = strtolower( trim( (string) $value ) );
+	if ( '' === $value ) {
+		return '';
+	}
+	if ( ! preg_match( '/^[a-f0-9]{64}$/', $value ) ) {
+		add_settings_error( 'wpdg_messages', 'invalid_sha256', __( 'Enter a valid 64-character SHA-256 checksum or leave it empty.', 'devjoynal-downgrade' ), 'error' );
+		return get_option( DOWNGRADE_OPTION_SHA256, '' );
+	}
+	return $value;
 }
 
 /** Add a direct Settings link to the plugin row. */
@@ -145,6 +167,7 @@ function downgrade_handle_reset() {
 	delete_option( DOWNGRADE_OPTION_VERSION );
 	delete_option( DOWNGRADE_OPTION_URL );
 	delete_option( DOWNGRADE_OPTION_CUSTOM_URL );
+	delete_option( DOWNGRADE_OPTION_SHA256 );
 	wp_safe_redirect( add_query_arg( array( 'page' => 'devjoynal-downgrade', 'downgrade_reset' => '1' ), admin_url( 'options-general.php' ) ) );
 	exit;
 }
@@ -177,20 +200,51 @@ function downgrade_check_url( $url ) {
 	if ( false !== $cached && is_array( $cached ) ) {
 		return $cached;
 	}
-	$response = wp_safe_remote_head(
-		$url,
-		array(
-			'timeout'     => 5,
-			'redirection' => 0,
-		)
+	$args = array(
+		'timeout'             => 5,
+		'redirection'         => 0,
+		'limit_response_size' => 1,
+		'headers'             => array( 'Range' => 'bytes=0-0' ),
 	);
+	$response = wp_safe_remote_head( $url, $args );
+	if ( is_wp_error( $response ) || in_array( (int) wp_remote_retrieve_response_code( $response ), array( 403, 405, 501 ), true ) ) {
+		$response = wp_safe_remote_get( $url, $args );
+	}
 	$result = array( 'ok' => false, 'code' => 0 );
 	if ( ! is_wp_error( $response ) ) {
 		$code = (int) wp_remote_retrieve_response_code( $response );
-		$result = array( 'ok' => in_array( $code, array( 200, 301, 302 ), true ), 'code' => $code );
+		$content_type = strtolower( (string) wp_remote_retrieve_header( $response, 'content-type' ) );
+		$looks_like_html = false !== strpos( $content_type, 'text/html' );
+		$result = array(
+			'ok'   => in_array( $code, array( 200, 206, 301, 302 ), true ) && ! $looks_like_html,
+			'code' => $code,
+		);
 	}
 	set_transient( $cache_key, $result, 5 * MINUTE_IN_SECONDS );
 	return $result;
+}
+
+/** Verify a custom package before WordPress Core unpacks it when a digest is supplied. */
+function downgrade_verify_custom_package( $reply, $package, $upgrader ) {
+	if ( false !== $reply || ! is_string( $package ) ) {
+		return $reply;
+	}
+	$custom_enabled = (bool) get_option( DOWNGRADE_OPTION_CUSTOM_URL, false );
+	$custom_url     = (string) get_option( DOWNGRADE_OPTION_URL, '' );
+	$expected       = strtolower( (string) get_option( DOWNGRADE_OPTION_SHA256, '' ) );
+	if ( ! $custom_enabled || ! $custom_url || ! $expected || ! hash_equals( $custom_url, $package ) ) {
+		return $reply;
+	}
+	$temp_file = download_url( $package, 30 );
+	if ( is_wp_error( $temp_file ) ) {
+		return $temp_file;
+	}
+	$actual = hash_file( 'sha256', $temp_file );
+	if ( ! is_string( $actual ) || ! hash_equals( $expected, strtolower( $actual ) ) ) {
+		wp_delete_file( $temp_file );
+		return new WP_Error( 'downgrade_checksum_mismatch', __( 'The custom package SHA-256 checksum does not match the configured value.', 'devjoynal-downgrade' ) );
+	}
+	return $temp_file;
 }
 
 /** Safely redirect WordPress Core updates to the configured version. */
@@ -203,20 +257,38 @@ function downgrade_filter_core_updates( $updates ) {
 	if ( version_compare( $wp_version, $target, '=' ) ) {
 		return $updates;
 	}
-	$update = $updates->updates[0];
-	if ( ! is_object( $update ) ) {
+	$locale = determine_locale();
+	$selected_index = null;
+	foreach ( $updates->updates as $index => $candidate ) {
+		if ( ! is_object( $candidate ) ) {
+			continue;
+		}
+		if ( null === $selected_index ) {
+			$selected_index = $index;
+		}
+		if ( isset( $candidate->locale ) && $locale === $candidate->locale ) {
+			$selected_index = $index;
+			break;
+		}
+	}
+	if ( null === $selected_index || ! isset( $updates->updates[ $selected_index ] ) || ! is_object( $updates->updates[ $selected_index ] ) ) {
 		return $updates;
 	}
+	$update = $updates->updates[ $selected_index ];
 	$url = downgrade_get_effective_url( $target );
+	$update->response = 'upgrade';
 	$update->download = $url;
+	$update->current = $target;
+	$update->locale = $locale;
 	if ( ! isset( $update->packages ) || ! is_object( $update->packages ) ) {
 		$update->packages = new stdClass();
 	}
 	$update->packages->full = $url;
+	$update->packages->partial = '';
 	$update->packages->no_content = '';
 	$update->packages->new_bundled = '';
-	$update->current = $target;
-	$updates->updates[0] = $update;
+	$update->packages->rollback = '';
+	$updates->updates[ $selected_index ] = $update;
 	return $updates;
 }
 
@@ -259,6 +331,7 @@ function downgrade_render_settings_page() {
 	$target = get_option( DOWNGRADE_OPTION_VERSION, '' );
 	$custom_enabled = (bool) get_option( DOWNGRADE_OPTION_CUSTOM_URL, false );
 	$custom_url = get_option( DOWNGRADE_OPTION_URL, '' );
+	$sha256 = get_option( DOWNGRADE_OPTION_SHA256, '' );
 	$effective_url = downgrade_get_effective_url( $target );
 	$check = $target ? downgrade_check_url( $effective_url ) : array( 'ok' => false, 'code' => 0 );
 	$author_image = plugins_url( 'assets/joynal-abdin.jpg', __FILE__ );
@@ -282,9 +355,10 @@ function downgrade_render_settings_page() {
 						<tr><th scope="row"><?php esc_html_e( 'Detected locale', 'devjoynal-downgrade' ); ?></th><td><?php echo esc_html( determine_locale() ); ?></td></tr>
 					</table>
 					<h2><?php esc_html_e( 'Optional custom package URL', 'devjoynal-downgrade' ); ?></h2>
-					<p><label><input type="checkbox" name="wpdg_edit_download_url" value="1" <?php checked( $custom_enabled ); ?> /> <?php esc_html_e( 'Use a custom HTTP(S) WordPress ZIP URL', 'devjoynal-downgrade' ); ?></label></p>
+					<p><input type="hidden" name="wpdg_edit_download_url" value="0" /><label><input type="checkbox" name="wpdg_edit_download_url" value="1" <?php checked( $custom_enabled ); ?> /> <?php esc_html_e( 'Use a custom HTTP(S) WordPress ZIP URL', 'devjoynal-downgrade' ); ?></label></p>
 					<p><input class="large-text" name="wpdg_download_url" type="url" placeholder="https://downloads.wordpress.org/release/wordpress-7.0.6.zip" value="<?php echo esc_attr( $custom_url ); ?>" /></p>
-					<p class="description"><?php esc_html_e( 'Only use a trusted source. This plugin does not inspect the archive contents.', 'devjoynal-downgrade' ); ?></p>
+					<p><label for="wpdg_download_sha256"><?php esc_html_e( 'Expected SHA-256 checksum (recommended for custom packages)', 'devjoynal-downgrade' ); ?></label><br><input class="large-text code" id="wpdg_download_sha256" name="wpdg_download_sha256" type="text" inputmode="text" pattern="[a-fA-F0-9]{64}" value="<?php echo esc_attr( $sha256 ); ?>" placeholder="64-character SHA-256 digest" /></p>
+					<p class="description"><?php esc_html_e( 'When a checksum is provided, the custom package is rejected if its SHA-256 digest does not match. Use a trusted source and test on staging first.', 'devjoynal-downgrade' ); ?></p>
 					<?php submit_button( __( 'Save settings', 'devjoynal-downgrade' ) ); ?>
 				</form>
 				<form method="post" class="downgrade-actions">
