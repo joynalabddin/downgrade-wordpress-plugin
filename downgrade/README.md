@@ -9,7 +9,7 @@
 | Field | Value |
 |---|---|
 | Plugin name | Downgrade |
-| Current release | 1.2.6 |
+| Current release | 2.0.0 |
 | Author | Joynal Abdin |
 | Website | [devjoynal.com](https://devjoynal.com) |
 | Tested environment | WordPress 7.1, PHP 8.4 claim supplied by the project owner; live staging UI verified on WordPress 7.1 |
@@ -19,7 +19,20 @@
 
 After activation, open **Settings → Downgrade**, enter an exact WordPress release such as `7.0.6`, and save. The plugin changes the update information presented to WordPress so that the selected release is offered through the normal Core Update screen. WordPress downloads the release ZIP from the official WordPress distribution endpoint unless an administrator deliberately enables the custom download URL option.
 
-Leaving the target version empty disables the pin. Deactivating the plugin also removes its update filters. The plugin does not replace a backup, staging workflow, security update policy, or compatibility testing process.
+### Professional features in 2.0.0
+
+| Feature | What it does | Operational benefit |
+|---|---|---|
+| Exact version pinning | Accepts structured versions such as `7.0.6` and rejects malformed input. | Reduces configuration mistakes. |
+| Official release URL builder | Generates a locale-aware WordPress download URL. | Keeps the default path predictable. |
+| Custom URL opt-in | Allows a trusted administrator to use a language-specific or controlled ZIP source. | Supports controlled environments while making the risk explicit. |
+| Diagnostics panel | Shows effective URL, reachability result, HTTP status, plugin version, locale, and current WordPress version. | Makes pre-update review easier. |
+| Reset control | Clears the version pin and custom URL after a nonce and capability check. | Provides a documented return to the standard update channel. |
+| Safer update filter | Avoids mutating missing or malformed update objects and preserves the original update response when no target is configured. | Improves resilience on modern WordPress installations. |
+| Author panel | Displays the supplied Joynal Abdin portrait and links to `devjoynal.com`. | Provides clear project ownership inside the admin screen. |
+| Responsive admin UI | Uses scoped styles and adapts the settings layout for smaller screens. | Makes the workflow more comfortable on laptops and tablets. |
+
+Leaving the target version empty or using **Reset all Downgrade settings** disables the pin. Deactivating the plugin also removes its update filters. The plugin does not replace a backup, staging workflow, security update policy, or compatibility testing process.
 
 ## Installation
 
@@ -42,7 +55,7 @@ The optional custom URL field is intended for an administrator who must use a la
 
 ## Compatibility and testing
 
-The plugin main file passes `php -l` syntax validation in this repository. The supplied staging site reported **WordPress 7.1** and the plugin was installed and activated successfully; the live settings page loaded and displayed the current WordPress version. PHP 8.4 compatibility is recorded from the project owner’s requirement and should be rechecked on the target host with its actual extensions, filesystem permissions, and update method before production use.
+The plugin main file passes `php -l` syntax validation in this repository, and the new settings/reset/diagnostics code is written with WordPress capability and nonce checks. The supplied staging site reported **WordPress 7.1** and the plugin was installed and activated successfully; the live settings page loaded and displayed the current WordPress version. PHP 8.4 compatibility is recorded from the project owner’s requirement and should be rechecked on the target host with its actual extensions, filesystem permissions, and update method before production use.
 
 This project is not a promise that every WordPress installation or every PHP 8.4 configuration will behave identically. Test on staging and keep a recovery path.
 
