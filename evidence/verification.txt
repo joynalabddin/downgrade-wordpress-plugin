@@ -1,0 +1,132 @@
+Skip to main content
+Skip to toolbar
+
+
+Dashboard
+Home
+Updates
+
+
+Posts
+All Posts
+Add Post
+Categories
+Tags
+
+
+Media
+Library
+Add Media File
+
+
+Pages
+All Pages
+Add Page
+
+
+Comments
+
+
+Appearance
+Themes
+Editor
+Fonts
+
+
+Plugins
+Installed Plugins
+Add Plugin
+
+
+Users
+All Users
+Add User
+Profile
+
+
+Tools
+Available Tools
+Import
+Export
+Site Health 1
+Export Personal Data
+Erase Personal Data
+Theme File Editor
+Plugin File Editor
+
+
+Settings
+General
+Connectors
+Writing
+Reading
+Discussion
+Media
+Permalinks
+Privacy
+Downgrade
+
+
+Redirection
+Copy & Delete Posts
+Backup Migration
+
+
+MyPopUps
+Collapse Menu
+About WordPress
+Thirsty Profit
+Ctrl+K
+Open command palette
+0
+0 Comments in moderation
+New
+Howdy, admin
+Your site was set up successfully
+Login details: Copy
+ Admin area URL: https://thirstyprofit.s6-tastewp.com/wp-admin
+ Username: admin  Password: 1qIjWziR7fE
+Expiry:
+Your site will be automatically deleted in
+  
+01
+Days
+:
+ 
+23
+Hours
+:
+ 
+41
+Minutes
+:
+ 
+07
+Seconds
+Don't want it to expire?
+Share TasteWP
+Login to TasteWP and then create a new site – you'll then see a link you can share with your followers & friends. For every 3 people who sign up, you get one non-expiring site (up to 3)!
+and / or
+Go Premium
+No expiry
+More space
+Top support
+Own domain
+Buy now
+From 2.98 USD/month only – cancel anytime
+Learn more
+Ok, got it!
+Powered by TasteWP.com
+Downgrade Options
+Downgrade: Inactive
+
+WARNING! You are using this plugin entirely at your own risk! DO MAKE SURE you have a current backup of both your files and database, since a manual version change is deeply affecting your WP installation!
+
+Which WordPress version would you like to up-/downgrade to?
+WordPress Target Version:		Exact version number from WP Releases, for example "4.9.8". Leave empty to disable.
+Current WP Version:	7.1	
+Language Detected:	en_US	
+
+Thank you for creating with WordPress.
+
+Version 7.1
