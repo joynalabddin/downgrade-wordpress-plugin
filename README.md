@@ -1,9 +1,11 @@
 # DevJoynal Downgrade — Controlled WordPress Core Version Management
 
-[![Latest release](https://img.shields.io/github/v/release/joynalabddin/downgrade-wordpress-plugin?display_name=tag&sort=semver)](https://github.com/joynalabddin/downgrade-wordpress-plugin/releases)
+[![CI](https://github.com/joynalabddin/downgrade-wordpress-plugin/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/joynalabddin/downgrade-wordpress-plugin/actions/workflows/ci.yml)
+[![Latest release](https://img.shields.io/github/v/release/joynalabddin/downgrade-wordpress-plugin?display_name=tag&sort=semver)](https://github.com/joynalabddin/downgrade-wordpress-plugin/releases/latest)
+[![WordPress tested up to](https://img.shields.io/badge/WordPress_tested_up_to-7.1-21759b.svg)](https://wordpress.org/download/releases/)
+[![Requires WordPress](https://img.shields.io/badge/WordPress_required-5.8%2B-21759b.svg)](https://wordpress.org/)
+[![Requires PHP](https://img.shields.io/badge/PHP_required-7.4%2B-777bb4.svg)](https://www.php.net/supported-versions.php)
 [![License](https://img.shields.io/badge/license-GPLv2%20or%20later-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
-[![WordPress](https://img.shields.io/badge/WordPress-5.8%2B-21759b.svg)](https://wordpress.org/)
-[![PHP](https://img.shields.io/badge/PHP-7.4%2B-777bb4.svg)](https://www.php.net/)
 
 **DevJoynal Downgrade** is a focused WordPress plugin for administrators who need to pin WordPress Core to an exact release and review that release through the native WordPress Core Update workflow. It is designed for controlled WordPress rollback, compatibility testing, reinstall workflows, staging recovery, and planned Core upgrades where a specific WordPress version is required.
 
