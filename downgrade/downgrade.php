@@ -3,7 +3,7 @@
  * Plugin Name: Downgrade
  * Plugin URI: https://devjoynal.com
  * Description: Pin WordPress Core to an exact release for controlled rollback, compatibility testing, reinstall, or upgrade workflows.
- * Version: 2.0.1
+ * Version: 2.0.2
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Tested up to: 7.1
@@ -16,7 +16,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'DOWNGRADE_VERSION', '2.0.1' );
+define( 'DOWNGRADE_VERSION', '2.0.2' );
 define( 'DOWNGRADE_OPTION_VERSION', 'wpdg_specific_version_name' );
 define( 'DOWNGRADE_OPTION_URL', 'wpdg_download_url' );
 define( 'DOWNGRADE_OPTION_CUSTOM_URL', 'wpdg_edit_download_url' );
@@ -107,7 +107,7 @@ function downgrade_sanitize_url( $value ) {
 }
 
 function downgrade_sanitize_boolean( $value ) {
-	return (bool) $value;
+	return in_array( (string) $value, array( '1', 'true', 'on' ), true );
 }
 
 /** Add a direct Settings link to the plugin row. */
@@ -167,17 +167,30 @@ function downgrade_get_effective_url( $version = '' ) {
 	return $version ? downgrade_get_release_url( $version ) : '';
 }
 
-/** Check an endpoint without breaking the admin screen on network errors. */
+/** Check an endpoint with a short transient cache and no automatic redirects. */
 function downgrade_check_url( $url ) {
-	if ( ! $url ) {
+	if ( ! $url || ! wp_http_validate_url( $url ) ) {
 		return array( 'ok' => false, 'code' => 0 );
 	}
-	$response = wp_remote_head( $url, array( 'timeout' => 8, 'redirection' => 3 ) );
-	if ( is_wp_error( $response ) ) {
-		return array( 'ok' => false, 'code' => 0 );
+	$cache_key = 'wpdg_url_' . md5( $url );
+	$cached = get_transient( $cache_key );
+	if ( false !== $cached && is_array( $cached ) ) {
+		return $cached;
 	}
-	$code = (int) wp_remote_retrieve_response_code( $response );
-	return array( 'ok' => in_array( $code, array( 200, 301, 302 ), true ), 'code' => $code );
+	$response = wp_safe_remote_head(
+		$url,
+		array(
+			'timeout'     => 5,
+			'redirection' => 0,
+		)
+	);
+	$result = array( 'ok' => false, 'code' => 0 );
+	if ( ! is_wp_error( $response ) ) {
+		$code = (int) wp_remote_retrieve_response_code( $response );
+		$result = array( 'ok' => in_array( $code, array( 200, 301, 302 ), true ), 'code' => $code );
+	}
+	set_transient( $cache_key, $result, 5 * MINUTE_IN_SECONDS );
+	return $result;
 }
 
 /** Safely redirect WordPress Core updates to the configured version. */

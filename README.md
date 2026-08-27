@@ -9,7 +9,7 @@
 | Field | Value |
 |---|---|
 | Plugin name | Downgrade |
-| Current release | 2.0.1 |
+| Current release | 2.0.2 |
 | Author | Joynal Abdin |
 | Website | [devjoynal.com](https://devjoynal.com) |
 | Tested environment | WordPress 7.1, PHP 8.4 claim supplied by the project owner; live staging UI verified on WordPress 7.1 |
@@ -19,7 +19,7 @@
 
 After activation, open **Settings → Downgrade**, enter an exact WordPress release such as `7.0.6`, and save. The plugin changes the update information presented to WordPress so that the selected release is offered through the normal Core Update screen. WordPress downloads the release ZIP from the official WordPress distribution endpoint unless an administrator deliberately enables the custom download URL option.
 
-### Professional features in 2.0.1
+### Professional features in 2.0.2
 
 | Feature | What it does | Operational benefit |
 |---|---|---|
@@ -32,8 +32,10 @@ After activation, open **Settings → Downgrade**, enter an exact WordPress rele
 | Author panel | Displays the supplied Joynal Abdin portrait and links to `devjoynal.com`. | Provides clear project ownership inside the admin screen. |
 | Responsive admin UI | Uses scoped styles and adapts the settings layout for smaller screens. | Makes the workflow more comfortable on laptops and tablets. |
 | View details override | Supplies project-owned plugin-information metadata for the `downgrade` slug. | Prevents the details modal from showing unrelated old directory branding. |
+| Safe diagnostics requests | Uses WordPress safe remote requests, disables automatic redirects, and caches reachability checks briefly. | Reduces SSRF exposure and repeated network overhead. |
+| Strict checkbox sanitization | Accepts only explicit enabled values. | Avoids malformed settings state. |
 
-The WordPress Plugins screen may build the **View details** modal from a public directory slug rather than the local Plugin URI. Downgrade 2.0.1 intercepts its own `downgrade` slug and supplies project-owned information, so the modal uses Joynal Abdin, devjoynal.com, Downgrade 2.0.1, and the project’s own description instead of unrelated third-party directory content.
+The WordPress Plugins screen may build the **View details** modal from a public directory slug rather than the local Plugin URI. Downgrade 2.0.2 intercepts its own `downgrade` slug and supplies project-owned information, so the modal uses Joynal Abdin, devjoynal.com, Downgrade 2.0.2, and the project’s own description instead of unrelated third-party directory content.
 
 Leaving the target version empty or using **Reset all Downgrade settings** disables the pin. Deactivating the plugin also removes its update filters. The plugin does not replace a backup, staging workflow, security update policy, or compatibility testing process.
 
@@ -59,6 +61,10 @@ The optional custom URL field is intended for an administrator who must use a la
 ## Additional professional features worth considering
 
 The current safe scope focuses on controlled version management. Future releases could add a dry-run preview that never starts an update, exportable diagnostic reports, an admin-only audit log of setting changes, configurable backup-provider checks, multisite-aware status reporting, and automated compatibility checks against the active PHP version. These features should be implemented only with clear permissions, privacy boundaries, and tests; adding more buttons without reliable workflows would not make the plugin more professional.
+
+## Security and performance audit
+
+The source contains no third-party runtime dependencies, no executable downloads, no arbitrary code execution, and no direct unescaped user-controlled output in the admin view. State-changing reset requests use a capability check and nonce. Settings use the WordPress Settings API sanitization callbacks. Diagnostics now use `wp_safe_remote_head()` with a five-second timeout, no automatic redirects, and a five-minute transient cache keyed by the URL, reducing repeated requests and preventing blind redirect following. The optional custom ZIP URL remains administrator-controlled and should point only to a trusted WordPress archive.
 
 ## Compatibility and testing
 
