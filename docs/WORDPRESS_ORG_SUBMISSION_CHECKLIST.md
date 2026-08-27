@@ -13,7 +13,7 @@ This checklist is tailored to **DevJoynal Downgrade** and should be reviewed imm
 | WordPress.org readme | Complete | `devjoynal-downgrade/readme.txt` contains metadata, description, installation, FAQ, screenshots, changelog, and upgrade notice. |
 | Screenshots | Complete | `screenshot-1.png`, `screenshot-2.png`, and `screenshot-3.png` are present and referenced. |
 | Human-readable source | Complete | The deployed PHP source is readable and the repository is publicly maintained. |
-| CI and package checks | Complete | `.github/workflows/ci.yml` validates syntax, metadata, package structure, and archive integrity. |
+| CI and package checks | Complete | `.github/workflows/ci.yml` validates PHP syntax, WordPress Coding Standards, metadata, package structure, and archive integrity. |
 | WordPress.org account | Blocked | The current `wpexpertrafi` account was previously reported as disabled; contact WordPress.org account support before submitting. |
 | Official submission | Not yet completed | Submit only after the account is active and the final package passes the readme validator. |
 
@@ -24,6 +24,8 @@ Run the following checks from the repository root:
 ```bash
 php -l devjoynal-downgrade/devjoynal-downgrade.php
 git diff --check
+composer install --working-dir=tools --no-interaction --prefer-dist --no-progress
+tools/vendor/bin/phpcs --standard=phpcs.xml.dist
 git status --short
 ```
 

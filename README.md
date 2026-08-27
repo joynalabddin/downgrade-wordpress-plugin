@@ -176,9 +176,11 @@ Before opening a pull request or publishing a release, run the local checks rele
 ```bash
 php -l devjoynal-downgrade/devjoynal-downgrade.php
 git diff --check
+composer install --working-dir=tools --no-interaction --prefer-dist --no-progress
+tools/vendor/bin/phpcs --standard=phpcs.xml.dist
 ```
 
-GitHub Actions additionally checks PHP syntax on PHP 7.4 and PHP 8.4, plugin metadata, documentation hygiene, package structure, required files, and release archive integrity. A clean syntax check does not prove that a live Core update is safe; staging validation remains required.
+GitHub Actions additionally checks PHP syntax on PHP 7.4 and PHP 8.4, WordPress Coding Standards through PHPCS/WPCS, plugin metadata, documentation hygiene, package structure, required files, and release archive integrity. A clean syntax or coding-standard check does not prove that a live Core update is safe; staging validation remains required.
 
 ## WordPress.org documentation
 

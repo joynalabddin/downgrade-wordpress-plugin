@@ -1,0 +1,14 @@
+{
+  "name": "devjoynal/downgrade-tools",
+  "description": "Development-only quality tools for DevJoynal Downgrade",
+  "type": "project",
+  "require-dev": {
+    "squizlabs/php_codesniffer": "^3.13",
+    "wp-coding-standards/wpcs": "^3.2"
+  },
+  "config": {
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  }
+}

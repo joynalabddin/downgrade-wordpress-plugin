@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<ruleset name="DevJoynal Downgrade">
+	<description>WordPress Coding Standards for DevJoynal Downgrade.</description>
+	<rule ref="WordPress" />
+	<file>devjoynal-downgrade</file>
+	<exclude-pattern>*/languages/*</exclude-pattern>
+	<exclude-pattern>*/vendor/*</exclude-pattern>
+	<arg name="extensions" value="php" />
+	<arg name="parallel" value="4" />
+	<arg value="sp" />
+</ruleset>

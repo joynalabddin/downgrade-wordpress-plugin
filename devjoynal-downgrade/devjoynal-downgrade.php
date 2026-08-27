@@ -12,6 +12,8 @@
  * License: GPL-2.0-or-later
  * Text Domain: devjoynal-downgrade
  * Domain Path: /languages
+ *
+ * @package DevJoynal_Downgrade
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -89,7 +91,12 @@ function downgrade_register_settings() {
 	);
 }
 
-/** Validate a WordPress version without accepting arbitrary strings. */
+/**
+ * Validate a WordPress version without accepting arbitrary strings.
+ *
+ * @param string $value Submitted version value.
+ * @return string Sanitized version or the previous saved value.
+ */
 function downgrade_sanitize_version( $value ) {
 	$value = trim( (string) $value );
 	if ( '' === $value ) {
@@ -102,7 +109,12 @@ function downgrade_sanitize_version( $value ) {
 	return $value;
 }
 
-/** Accept only absolute HTTP(S) URLs for the optional custom package. */
+/**
+ * Accept only absolute HTTP(S) URLs for the optional custom package.
+ *
+ * @param string $value Submitted package URL.
+ * @return string Sanitized URL or the previous saved value.
+ */
 function downgrade_sanitize_url( $value ) {
 	$value = trim( (string) $value );
 	if ( '' === $value ) {
@@ -116,10 +128,21 @@ function downgrade_sanitize_url( $value ) {
 	return $url;
 }
 
+/**
+ * Normalize a submitted checkbox value to a boolean.
+ *
+ * @param mixed $value Submitted checkbox value.
+ * @return bool Normalized boolean value.
+ */
 function downgrade_sanitize_boolean( $value ) {
 	return in_array( (string) $value, array( '1', 'true', 'on' ), true );
 }
-/** Accept an optional SHA-256 digest for custom package verification. */
+/**
+ * Accept an optional SHA-256 digest for custom package verification.
+ *
+ * @param string $value Submitted digest.
+ * @return string Sanitized digest or the previous saved value.
+ */
 function downgrade_sanitize_sha256( $value ) {
 	$value = strtolower( trim( (string) $value ) );
 	if ( '' === $value ) {
@@ -132,7 +155,12 @@ function downgrade_sanitize_sha256( $value ) {
 	return $value;
 }
 
-/** Add a direct Settings link to the plugin row. */
+/**
+ * Add a direct Settings link to the plugin row.
+ *
+ * @param array<string,string> $links Existing plugin action links.
+ * @return array<string,string> Updated plugin action links.
+ */
 function downgrade_plugin_action_links( $links ) {
 	$settings_link = sprintf(
 		'<a href="%s">%s</a>',
@@ -143,7 +171,12 @@ function downgrade_plugin_action_links( $links ) {
 	return $links;
 }
 
-/** Load a small, scoped stylesheet only on the Downgrade screen. */
+/**
+ * Load a small, scoped stylesheet only on the Downgrade screen.
+ *
+ * @param string $hook Current admin page hook.
+ * @return void
+ */
 function downgrade_enqueue_admin_assets( $hook ) {
 	if ( 'settings_page_devjoynal-downgrade' !== $hook ) {
 		return;
@@ -168,39 +201,67 @@ function downgrade_handle_reset() {
 	delete_option( DOWNGRADE_OPTION_URL );
 	delete_option( DOWNGRADE_OPTION_CUSTOM_URL );
 	delete_option( DOWNGRADE_OPTION_SHA256 );
-	wp_safe_redirect( add_query_arg( array( 'page' => 'devjoynal-downgrade', 'downgrade_reset' => '1' ), admin_url( 'options-general.php' ) ) );
+	wp_safe_redirect(
+		add_query_arg(
+			array(
+				'page'            => 'devjoynal-downgrade',
+				'downgrade_reset' => '1',
+			),
+			admin_url( 'options-general.php' )
+		)
+	);
 	exit;
 }
 
-/** Build the official release URL for the site locale. */
+/**
+ * Build the official release URL for the site locale.
+ *
+ * @param string $version WordPress release version.
+ * @return string Official package URL.
+ */
 function downgrade_get_release_url( $version ) {
 	$locale = determine_locale();
 	$locale = ( 'en_US' === $locale || 'en' === $locale ) ? '' : trailingslashit( $locale );
 	return 'https://downloads.wordpress.org/release/' . $locale . 'wordpress-' . rawurlencode( $version ) . '.zip';
 }
 
-/** Return the effective package URL, respecting the opt-in custom URL setting. */
+/**
+ * Return the effective package URL, respecting the opt-in custom URL setting.
+ *
+ * @param string $version Optional WordPress release version.
+ * @return string Effective package URL or an empty string.
+ */
 function downgrade_get_effective_url( $version = '' ) {
-	$version = $version ?: get_option( DOWNGRADE_OPTION_VERSION, '' );
+	if ( '' === $version ) {
+		$version = get_option( DOWNGRADE_OPTION_VERSION, '' );
+	}
 	$custom_enabled = (bool) get_option( DOWNGRADE_OPTION_CUSTOM_URL, false );
-	$custom_url = get_option( DOWNGRADE_OPTION_URL, '' );
+	$custom_url     = get_option( DOWNGRADE_OPTION_URL, '' );
 	if ( $custom_enabled && $custom_url ) {
 		return $custom_url;
 	}
 	return $version ? downgrade_get_release_url( $version ) : '';
 }
 
-/** Check an endpoint with a short transient cache and no automatic redirects. */
+/**
+ * Check an endpoint with a short transient cache and no automatic redirects.
+ *
+ * @param string $url Package URL to check.
+ * @return array{ok:bool,code:int} Diagnostic result.
+ */
 function downgrade_check_url( $url ) {
 	if ( ! $url || ! wp_http_validate_url( $url ) ) {
-		return array( 'ok' => false, 'code' => 0 );
+		return array(
+			'ok'   => false,
+			'code' => 0,
+		);
 	}
 	$cache_key = 'wpdg_url_' . md5( $url );
-	$cached = get_transient( $cache_key );
+	$cached    = get_transient( $cache_key );
 	if ( false !== $cached && is_array( $cached ) ) {
 		return $cached;
 	}
-	$args = array(
+	$args     = array(
 		'timeout'             => 5,
 		'redirection'         => 0,
 		'limit_response_size' => 1,
@@ -210,12 +271,15 @@ function downgrade_check_url( $url ) {
 	if ( is_wp_error( $response ) || in_array( (int) wp_remote_retrieve_response_code( $response ), array( 403, 405, 501 ), true ) ) {
 		$response = wp_safe_remote_get( $url, $args );
 	}
-	$result = array( 'ok' => false, 'code' => 0 );
+	$result = array(
+		'ok'   => false,
+		'code' => 0,
+	);
 	if ( ! is_wp_error( $response ) ) {
-		$code = (int) wp_remote_retrieve_response_code( $response );
-		$content_type = strtolower( (string) wp_remote_retrieve_header( $response, 'content-type' ) );
+		$code            = (int) wp_remote_retrieve_response_code( $response );
+		$content_type    = strtolower( (string) wp_remote_retrieve_header( $response, 'content-type' ) );
 		$looks_like_html = false !== strpos( $content_type, 'text/html' );
-		$result = array(
+		$result          = array(
 			'ok'   => in_array( $code, array( 200, 206, 301, 302 ), true ) && ! $looks_like_html,
 			'code' => $code,
 		);
@@ -224,8 +288,16 @@ function downgrade_check_url( $url ) {
 	return $result;
 }
 
-/** Verify a custom package before WordPress Core unpacks it when a digest is supplied. */
+/**
+ * Verify a custom package before WordPress Core unpacks it when a digest is supplied.
+ *
+ * @param string|WP_Error $reply Existing download response.
+ * @param string          $package Package URL or path.
+ * @param object          $upgrader Active upgrader instance.
+ * @return string|WP_Error Existing response or verified temporary file.
+ */
 function downgrade_verify_custom_package( $reply, $package, $upgrader ) {
+	unset( $upgrader );
 	if ( false !== $reply || ! is_string( $package ) ) {
 		return $reply;
 	}
@@ -247,7 +319,12 @@ function downgrade_verify_custom_package( $reply, $package, $upgrader ) {
 	return $temp_file;
 }
 
-/** Safely redirect WordPress Core updates to the configured version. */
+/**
+ * Safely redirect WordPress Core updates to the configured version.
+ *
+ * @param object $updates Core update transient value.
+ * @return object Filtered or unchanged update transient.
+ */
 function downgrade_filter_core_updates( $updates ) {
 	$target = get_option( DOWNGRADE_OPTION_VERSION, '' );
 	if ( ! $target || ! is_object( $updates ) || empty( $updates->updates ) || ! is_array( $updates->updates ) ) {
@@ -257,7 +334,7 @@ function downgrade_filter_core_updates( $updates ) {
 	if ( version_compare( $wp_version, $target, '=' ) ) {
 		return $updates;
 	}
-	$locale = determine_locale();
+	$locale         = determine_locale();
 	$selected_index = null;
 	foreach ( $updates->updates as $index => $candidate ) {
 		if ( ! is_object( $candidate ) ) {
@@ -274,51 +351,58 @@ function downgrade_filter_core_updates( $updates ) {
 	if ( null === $selected_index || ! isset( $updates->updates[ $selected_index ] ) || ! is_object( $updates->updates[ $selected_index ] ) ) {
 		return $updates;
 	}
-	$update = $updates->updates[ $selected_index ];
-	$url = downgrade_get_effective_url( $target );
+	$update           = $updates->updates[ $selected_index ];
+	$url              = downgrade_get_effective_url( $target );
 	$update->response = 'upgrade';
 	$update->download = $url;
-	$update->current = $target;
-	$update->locale = $locale;
+	$update->current  = $target;
+	$update->locale   = $locale;
 	if ( ! isset( $update->packages ) || ! is_object( $update->packages ) ) {
 		$update->packages = new stdClass();
 	}
-	$update->packages->full = $url;
-	$update->packages->partial = '';
-	$update->packages->no_content = '';
-	$update->packages->new_bundled = '';
-	$update->packages->rollback = '';
+	$update->packages->full              = $url;
+	$update->packages->partial           = '';
+	$update->packages->no_content        = '';
+	$update->packages->new_bundled       = '';
+	$update->packages->rollback          = '';
 	$updates->updates[ $selected_index ] = $update;
 	return $updates;
 }
 
-/** Keep the WordPress View details modal on the project’s own branding. */
+/**
+ * Keep the WordPress View details modal on the project’s own branding.
+ *
+ * @param object|false $result Plugin information response.
+ * @param string       $action API action.
+ * @param object|array $args API request arguments.
+ * @return object|false Plugin information response.
+ */
 function downgrade_plugin_information_result( $result, $action, $args ) {
 	$slug = is_object( $args ) ? ( $args->slug ?? '' ) : ( is_array( $args ) && isset( $args['slug'] ) ? $args['slug'] : '' );
 	if ( 'plugin_information' !== $action || 'devjoynal-downgrade' !== $slug ) {
 		return $result;
 	}
-	$info = new stdClass();
-	$info->name = 'DevJoynal Downgrade';
-	$info->slug = 'devjoynal-downgrade';
-	$info->version = DOWNGRADE_VERSION;
-	$info->author = '<a href="https://devjoynal.com" target="_blank" rel="noopener noreferrer">Joynal Abdin</a>';
-	$info->author_profile = 'https://devjoynal.com';
-	$info->homepage = 'https://devjoynal.com';
+	$info                    = new stdClass();
+	$info->name              = 'DevJoynal Downgrade';
+	$info->slug              = 'devjoynal-downgrade';
+	$info->version           = DOWNGRADE_VERSION;
+	$info->author            = '<a href="https://devjoynal.com" target="_blank" rel="noopener noreferrer">Joynal Abdin</a>';
+	$info->author_profile    = 'https://devjoynal.com';
+	$info->homepage          = 'https://devjoynal.com';
 	$info->short_description = __( 'DevJoynal Downgrade pins WordPress Core to an exact release for controlled rollback, compatibility testing, reinstall, or upgrade workflows.', 'devjoynal-downgrade' );
-	$info->sections = array(
-		'description' => __( 'DevJoynal Downgrade provides controlled WordPress Core version management with validation, diagnostics, reset controls, and a trusted custom ZIP option.', 'devjoynal-downgrade' ),
+	$info->sections          = array(
+		'description'  => __( 'DevJoynal Downgrade provides controlled WordPress Core version management with validation, diagnostics, reset controls, and a trusted custom ZIP option.', 'devjoynal-downgrade' ),
 		'installation' => __( 'Install the ZIP, activate DevJoynal Downgrade, open Settings > DevJoynal Downgrade, enter an exact version, and review Update Core before proceeding.', 'devjoynal-downgrade' ),
-		'faq' => __( 'Always create and verify a complete files-and-database backup and test on staging before changing WordPress Core.', 'devjoynal-downgrade' ),
+		'faq'          => __( 'Always create and verify a complete files-and-database backup and test on staging before changing WordPress Core.', 'devjoynal-downgrade' ),
 	);
-	$info->requires = '5.8';
-	$info->requires_php = '7.4';
-	$info->tested = '7.1';
-	$info->download_link = '';
-	$info->rating = 0;
-	$info->num_ratings = 0;
-	$info->active_installs = 0;
-	$info->last_updated = gmdate( 'Y-m-d' );
+	$info->requires          = '5.8';
+	$info->requires_php      = '7.4';
+	$info->tested            = '7.1';
+	$info->download_link     = '';
+	$info->rating            = 0;
+	$info->num_ratings       = 0;
+	$info->active_installs   = 0;
+	$info->last_updated      = gmdate( 'Y-m-d' );
 	return $info;
 }
 
@@ -328,18 +412,23 @@ function downgrade_render_settings_page() {
 		wp_die( esc_html__( 'You do not have permission to manage Core updates.', 'devjoynal-downgrade' ) );
 	}
 	global $wp_version;
-	$target = get_option( DOWNGRADE_OPTION_VERSION, '' );
+	$target         = get_option( DOWNGRADE_OPTION_VERSION, '' );
 	$custom_enabled = (bool) get_option( DOWNGRADE_OPTION_CUSTOM_URL, false );
-	$custom_url = get_option( DOWNGRADE_OPTION_URL, '' );
-	$sha256 = get_option( DOWNGRADE_OPTION_SHA256, '' );
-	$effective_url = downgrade_get_effective_url( $target );
-	$check = $target ? downgrade_check_url( $effective_url ) : array( 'ok' => false, 'code' => 0 );
-	$author_image = plugins_url( 'assets/joynal-abdin.jpg', __FILE__ );
+	$custom_url     = get_option( DOWNGRADE_OPTION_URL, '' );
+	$sha256         = get_option( DOWNGRADE_OPTION_SHA256, '' );
+	$effective_url  = downgrade_get_effective_url( $target );
+	$check          = $target ? downgrade_check_url( $effective_url ) : array(
+		'ok'   => false,
+		'code' => 0,
+	);
+	$author_image   = plugins_url( 'assets/joynal-abdin.jpg', __FILE__ );
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Downgrade', 'devjoynal-downgrade' ); ?></h1>
 		<?php settings_errors( 'wpdg_messages' ); ?>
-		<?php if ( isset( $_GET['downgrade_reset'] ) ) : ?>
+			<?php // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only redirect flag controls a success notice only.
+			if ( isset( $_GET['downgrade_reset'] ) ) :
+				?>
 			<div class="notice notice-success is-dismissible"><p><?php esc_html_e( 'Version pin and custom download settings were reset.', 'devjoynal-downgrade' ); ?></p></div>
 		<?php endif; ?>
 		<div class="downgrade-grid">
@@ -371,7 +460,15 @@ function downgrade_render_settings_page() {
 				<h2><?php esc_html_e( 'Diagnostics', 'devjoynal-downgrade' ); ?></h2>
 				<p><strong><?php esc_html_e( 'Plugin version:', 'devjoynal-downgrade' ); ?></strong> <?php echo esc_html( DOWNGRADE_VERSION ); ?></p>
 				<p><strong><?php esc_html_e( 'Package status:', 'devjoynal-downgrade' ); ?></strong> <?php echo $target ? ( $check['ok'] ? esc_html__( 'Reachable', 'devjoynal-downgrade' ) : esc_html__( 'Could not verify', 'devjoynal-downgrade' ) ) : esc_html__( 'Not checked until a target is saved', 'devjoynal-downgrade' ); ?></p>
-				<?php if ( $effective_url ) : ?><p class="downgrade-muted"><strong><?php esc_html_e( 'Effective URL:', 'devjoynal-downgrade' ); ?></strong><br><code><?php echo esc_html( $effective_url ); ?></code><?php if ( $check['code'] ) : ?><br><?php printf( esc_html__( 'HTTP status: %d', 'devjoynal-downgrade' ), (int) $check['code'] ); ?><?php endif; ?></p><?php endif; ?>
+				<?php
+				if ( $effective_url ) :
+					?>
+					<p class="downgrade-muted"><strong><?php esc_html_e( 'Effective URL:', 'devjoynal-downgrade' ); ?></strong><br><code><?php echo esc_html( $effective_url ); ?></code>
+					<?php
+					if ( $check['code'] ) :
+						?>
+											<?php /* translators: %d: HTTP response status code. */ ?>
+						<br><?php printf( esc_html__( 'HTTP status: %d', 'devjoynal-downgrade' ), (int) $check['code'] ); ?><?php endif; ?></p><?php endif; ?>
 				<hr>
 				<div class="downgrade-author"><img src="<?php echo esc_url( $author_image ); ?>" alt="<?php esc_attr_e( 'Joynal Abdin, Downgrade plugin author', 'devjoynal-downgrade' ); ?>"><div><strong><?php esc_html_e( 'Joynal Abdin', 'devjoynal-downgrade' ); ?></strong><br><a href="https://devjoynal.com" target="_blank" rel="noopener noreferrer">devjoynal.com</a></div></div>
 				<p class="downgrade-muted"><?php esc_html_e( 'Downgrade is maintained for controlled WordPress Core version management. Review the backup and recovery plan before every change.', 'devjoynal-downgrade' ); ?></p>
