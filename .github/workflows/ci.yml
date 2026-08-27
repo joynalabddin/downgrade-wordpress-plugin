@@ -161,3 +161,25 @@ jobs:
 
       - name: Run PHPCS with WordPress Coding Standards
         run: tools/vendor/bin/phpcs --standard=phpcs.xml.dist
+
+  phpunit:
+    name: PHPUnit unit tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: mbstring,xml
+          tools: composer
+          coverage: none
+
+      - name: Install development tools
+        run: composer install --working-dir=tools --no-interaction --prefer-dist --no-progress
+
+      - name: Run PHPUnit
+        run: tools/vendor/bin/phpunit -c phpunit.xml.dist
