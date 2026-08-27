@@ -1,8 +1,8 @@
-# Downgrade 2.0.0 – Delivery Report
+# Downgrade 2.0.1 – Delivery Report
 
 ## Summary
 
-The supplied plugin has been rebranded as **Downgrade**, credited to **Joynal Abdin**, and linked to **devjoynal.com**. The author portrait supplied for this project is bundled at `downgrade/assets/joynal-abdin.jpg` and is displayed in the plugin’s administrator-facing diagnostics panel.
+The supplied plugin has been rebranded as **Downgrade**, credited to **Joynal Abdin**, and linked to **devjoynal.com**. Release 2.0.1 also fixes the WordPress **View details** modal, which previously loaded unrelated GraphicEdit/Reisetiger directory content for the public `downgrade` slug. The author portrait supplied for this project is bundled at `downgrade/assets/joynal-abdin.jpg` and is displayed in the plugin’s administrator-facing diagnostics panel.
 
 The original implementation was refactored rather than discarded. Legacy option names remain compatible, while the update filter, settings registration, sanitization, capability checks, nonce handling, diagnostics, reset workflow, and responsive admin presentation were rewritten for a more professional WordPress experience.
 
@@ -22,9 +22,9 @@ The original implementation was refactored rather than discarded. Legacy option 
 
 ## Verification performed
 
-The main PHP file passed `php -l` syntax validation. The staging site at `https://thirstyprofit.s6-tastewp.com` reported WordPress 7.1. The plugin was updated from the prior release, remained active, and the Plugins screen displayed Downgrade 2.0.0 by Joynal Abdin.
+The main PHP file passed `php -l` syntax validation. The staging site at `https://thirstyprofit.s6-tastewp.com` reported WordPress 7.1. The plugin was updated from the prior release, remained active, and the Plugins screen displayed Downgrade 2.0.1 by Joynal Abdin.
 
-The live settings test loaded the new page, confirmed the Diagnostics panel, confirmed that the author portrait loaded, saved a `7.0.6` target pin, displayed the effective URL, and then successfully cleared the pin using the reset control. The test did not execute a WordPress Core downgrade, so no production update is claimed.
+The live settings test loaded the new page, confirmed the Diagnostics panel, confirmed that the author portrait loaded, saved a `7.0.6` target pin, displayed the effective URL, and then successfully cleared the pin using the reset control. The View details modal displayed Downgrade 2.0.1, Joynal Abdin, and the devjoynal.com anchor, while the old GraphicEdit and Reisetiger branding was absent. The test did not execute a WordPress Core downgrade, so no production update is claimed.
 
 The project owner requested PHP 8.4 compatibility. The code uses PHP-compatible syntax and the project declares a minimum PHP version of 7.4; PHP 8.4 should still be validated on the actual production host with its extensions, permissions, and update method before deployment.
 
@@ -32,11 +32,11 @@ The project owner requested PHP 8.4 compatibility. The code uses PHP-compatible 
 
 | Artifact | Location |
 |---|---|
-| Installable ZIP | `downgrade-2.0.0.zip` |
+| Installable ZIP | `downgrade-2.0.1.zip` |
 | Author portrait | `repo/downgrade/assets/joynal-abdin.jpg` |
 | Live screenshots | `repo/evidence/` in the local workspace; the published repository contains the evidence under `evidence/` |
 | GitHub repository | [joynalabddin/downgrade-wordpress-plugin](https://github.com/joynalabddin/downgrade-wordpress-plugin) |
-| GitHub release | [Downgrade 2.0.0](https://github.com/joynalabddin/downgrade-wordpress-plugin/releases/tag/v2.0.0) |
+| GitHub release | [Downgrade 2.0.1](https://github.com/joynalabddin/downgrade-wordpress-plugin/releases/tag/v2.0.1) |
 
 The final ZIP SHA-256 checksum is recorded alongside the release asset. Always verify the checksum after downloading and before installation.
 

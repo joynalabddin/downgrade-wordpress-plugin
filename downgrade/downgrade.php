@@ -3,7 +3,7 @@
  * Plugin Name: Downgrade
  * Plugin URI: https://devjoynal.com
  * Description: Pin WordPress Core to an exact release for controlled rollback, compatibility testing, reinstall, or upgrade workflows.
- * Version: 2.0.0
+ * Version: 2.0.1
  * Requires at least: 5.8
  * Requires PHP: 7.4
  * Tested up to: 7.1
@@ -16,7 +16,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'DOWNGRADE_VERSION', '2.0.0' );
+define( 'DOWNGRADE_VERSION', '2.0.1' );
 define( 'DOWNGRADE_OPTION_VERSION', 'wpdg_specific_version_name' );
 define( 'DOWNGRADE_OPTION_URL', 'wpdg_download_url' );
 define( 'DOWNGRADE_OPTION_CUSTOM_URL', 'wpdg_edit_download_url' );
@@ -29,6 +29,7 @@ add_action( 'admin_enqueue_scripts', 'downgrade_enqueue_admin_assets' );
 add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), 'downgrade_plugin_action_links' );
 add_filter( 'pre_site_option_update_core', 'downgrade_filter_core_updates' );
 add_filter( 'site_transient_update_core', 'downgrade_filter_core_updates' );
+add_filter( 'plugins_api_result', 'downgrade_plugin_information_result', 10, 3 );
 
 /** Load translations without producing output. */
 function downgrade_load_textdomain() {
@@ -204,6 +205,36 @@ function downgrade_filter_core_updates( $updates ) {
 	$update->current = $target;
 	$updates->updates[0] = $update;
 	return $updates;
+}
+
+/** Keep the WordPress View details modal on the project’s own branding. */
+function downgrade_plugin_information_result( $result, $action, $args ) {
+	$slug = is_object( $args ) ? ( $args->slug ?? '' ) : ( is_array( $args ) && isset( $args['slug'] ) ? $args['slug'] : '' );
+	if ( 'plugin_information' !== $action || 'downgrade' !== $slug ) {
+		return $result;
+	}
+	$info = new stdClass();
+	$info->name = 'Downgrade';
+	$info->slug = 'downgrade';
+	$info->version = DOWNGRADE_VERSION;
+	$info->author = '<a href="https://devjoynal.com" target="_blank" rel="noopener noreferrer">Joynal Abdin</a>';
+	$info->author_profile = 'https://devjoynal.com';
+	$info->homepage = 'https://devjoynal.com';
+	$info->short_description = __( 'Pin WordPress Core to an exact release for controlled rollback, compatibility testing, reinstall, or upgrade workflows.', 'downgrade' );
+	$info->sections = array(
+		'description' => __( 'Downgrade provides controlled WordPress Core version management with validation, diagnostics, reset controls, and a trusted custom ZIP option.', 'downgrade' ),
+		'installation' => __( 'Install the ZIP, activate Downgrade, open Settings > Downgrade, enter an exact version, and review Update Core before proceeding.', 'downgrade' ),
+		'faq' => __( 'Always create and verify a complete files-and-database backup and test on staging before changing WordPress Core.', 'downgrade' ),
+	);
+	$info->requires = '5.8';
+	$info->requires_php = '7.4';
+	$info->tested = '7.1';
+	$info->download_link = '';
+	$info->rating = 0;
+	$info->num_ratings = 0;
+	$info->active_installs = 0;
+	$info->last_updated = gmdate( 'Y-m-d' );
+	return $info;
 }
 
 /** Render the professional settings and diagnostics interface. */

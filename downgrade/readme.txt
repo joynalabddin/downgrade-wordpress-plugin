@@ -3,7 +3,7 @@ Contributors: joynalabdin
 Tags: wordpress downgrade, wordpress rollback, core version, wordpress update, version pinning
 Requires at least: 3.0.1
 Tested up to: 7.1
-Stable tag: 2.0.0
+Stable tag: 2.0.1
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -15,7 +15,7 @@ Downgrade helps administrators pin WordPress Core to a specified version for sta
 
 This plugin is not a backup system. Always back up files and the database, test on staging, and maintain a recovery plan before changing WordPress Core.
 
-The 2.0.0 admin screen includes exact version validation, locale-aware release URLs, optional trusted custom ZIP URLs, package diagnostics, HTTP status checks, a nonce-protected reset action, responsive styling, and an author panel with Joynal Abdin's supplied portrait.
+The 2.0.1 admin screen includes exact version validation, locale-aware release URLs, optional trusted custom ZIP URLs, package diagnostics, HTTP status checks, a nonce-protected reset action, responsive styling, an author panel with Joynal Abdin's supplied portrait, and a project-owned View details response that prevents unrelated directory branding.
 
 == Installation ==
 
@@ -49,7 +49,8 @@ No. The project owner supplied PHP 8.4 as a target environment. Verify the actua
 
 == Changelog ==
 
-= 2.0.0 =
+= 2.0.1 =
+* Fixed the WordPress View details modal so the downgrade slug uses Joynal Abdin and devjoynal.com project metadata.
 * Refactored the admin screen and update filter for modern WordPress and PHP coding practices.
 * Added exact version validation, safe custom URL validation, diagnostics, HTTP status checks, and reset controls.
 * Added responsive admin styling and the Joynal Abdin author portrait.
@@ -59,5 +60,5 @@ No. The project owner supplied PHP 8.4 as a target environment. Verify the actua
 
 == Upgrade Notice ==
 
-= 2.0.0 =
+= 2.0.1 =
 Use a complete backup and staging test before changing WordPress Core.

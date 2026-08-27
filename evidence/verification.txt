@@ -1,5 +1,6 @@
-plugins: Downgrade 2.0.0 active; author Joynal Abdin
-settings: loaded; Diagnostics visible; author portrait loaded
-active pin: 7.0.6 saved; effective URL displayed
-reset: version pin cleared successfully
-site: WordPress 7.1 from live admin environment
+WordPress 7.1 live regression passed
+Downgrade 2.0.1 active
+View details uses Joynal Abdin and devjoynal.com
+Old GraphicEdit/Reisetiger branding absent
+Author portrait loaded
+Pin and reset workflows passed
