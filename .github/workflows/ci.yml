@@ -1,0 +1,140 @@
+name: Quality Checks
+
+on:
+  push:
+    branches:
+      - main
+      - 'fix/**'
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  php-syntax:
+    name: PHP syntax (${{ matrix.php-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        php-version: ['7.4', '8.4']
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-version }}
+          extensions: mbstring
+          tools: none
+          coverage: none
+
+      - name: Lint PHP files
+        shell: bash
+        run: |
+          set -euo pipefail
+          mapfile -t php_files < <(git ls-files '*.php')
+          if [[ "${#php_files[@]}" -eq 0 ]]; then
+            echo "No PHP files found."
+            exit 1
+          fi
+          for file in "${php_files[@]}"; do
+            echo "Linting ${file}"
+            php -l "${file}"
+          done
+
+  readme-and-metadata:
+    name: Readme and metadata checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate plugin metadata and documentation
+        shell: bash
+        run: |
+          set -euo pipefail
+          readme='devjoynal-downgrade/readme.txt'
+          main='devjoynal-downgrade/devjoynal-downgrade.php'
+
+          test -s "$readme"
+          test -s "$main"
+          test -s LICENSE
+          test -s README.md
+
+          grep -q '^=== DevJoynal Downgrade ===$' "$readme"
+          grep -q '^Contributors: joynalabdin$' "$readme"
+          grep -q '^Requires at least: 5.8$' "$readme"
+          grep -q '^Tested up to: 7.1$' "$readme"
+          grep -q '^Requires PHP: 7.4$' "$readme"
+          grep -q '^Stable tag: 2.0.4$' "$readme"
+          grep -q '^License: GPLv2 or later$' "$readme"
+          grep -q '^== Description ==$' "$readme"
+          grep -q '^== Installation ==$' "$readme"
+          grep -q '^== Frequently Asked Questions ==$' "$readme"
+          grep -q '^== Screenshots ==$' "$readme"
+          grep -q '^== Changelog ==$' "$readme"
+          grep -q '^== Upgrade Notice ==$' "$readme"
+          grep -q '^== External services ==$' "$readme"
+
+          for screenshot in \
+            devjoynal-downgrade/screenshot-1.png \
+            devjoynal-downgrade/screenshot-2.png \
+            devjoynal-downgrade/screenshot-3.png; do
+            test -f "$screenshot"
+          done
+
+          # Keep the directory-facing short description concise and avoid unsupported claims.
+          short_description=$(sed -n '10p' "$readme" | wc -m)
+          test "$short_description" -le 150
+          ! grep -qiE 'guaranteed.*(ranking|google)|#1 google|100% compatible' "$readme"
+
+          # Confirm the main PHP header exposes the release metadata used by WordPress.
+          grep -q 'Version:.*2\.0\.4' "$main"
+          grep -q 'Requires at least:.*5\.8' "$main"
+          grep -q 'Requires PHP:.*7\.4' "$main"
+
+      - name: Check Markdown and whitespace hygiene
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          test -z "$(grep -RInE '[[:blank:]]+$' README.md CHANGELOG.md REFACTORING_ROADMAP.md SECURITY_FIX_REPORT.md 2>/dev/null || true)"
+
+  package-smoke-test:
+    name: Package structure and checksum smoke test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Build and inspect plugin package
+        shell: bash
+        run: |
+          set -euo pipefail
+          package_root="$RUNNER_TEMP/devjoynal-downgrade-package"
+          package_zip="$RUNNER_TEMP/devjoynal-downgrade-ci.zip"
+          rm -rf "$package_root" "$package_zip"
+          mkdir -p "$package_root"
+          cp -a devjoynal-downgrade "$package_root/"
+
+          test -f "$package_root/devjoynal-downgrade/devjoynal-downgrade.php"
+          test -f "$package_root/devjoynal-downgrade/readme.txt"
+          test -f "$package_root/devjoynal-downgrade/screenshot-1.png"
+          test ! -e "$package_root/devjoynal-downgrade/downgrade"
+
+          (cd "$package_root" && zip -qr "$package_zip" devjoynal-downgrade)
+          unzip -tq "$package_zip"
+          unzip -l "$package_zip" | grep -q 'devjoynal-downgrade/devjoynal-downgrade.php'
+          sha256sum "$package_zip"
