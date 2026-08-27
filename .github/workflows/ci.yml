@@ -108,8 +108,9 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # git diff --check catches new whitespace errors without rejecting
+          # intentional two-space Markdown line breaks in existing documents.
           git diff --check
-          test -z "$(grep -RInE '[[:blank:]]+$' README.md CHANGELOG.md REFACTORING_ROADMAP.md SECURITY_FIX_REPORT.md 2>/dev/null || true)"
 
   package-smoke-test:
     name: Package structure and checksum smoke test
