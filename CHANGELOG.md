@@ -35,7 +35,7 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) an
 - Updated the GitHub README, WordPress readme, security report, and upgrade notice for the v2.0.4 behavior.
 - Added a portable SHA-256 manifest for the release ZIP.
 
-## [2.0.3] — 2026-08-27
+## 2.0.3 — 2026-08-27 (historical)
 
 ### Changed
 
@@ -48,14 +48,14 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) an
 - Hardened diagnostics with WordPress safe remote requests, no automatic redirects, and short transient caching.
 - Tightened boolean setting sanitization.
 
-## [2.0.2] — 2026-08-27
+## 2.0.2 — 2026-08-27 (historical)
 
 ### Security and reliability
 
 - Hardened diagnostics and prepared the plugin for WordPress.org submission.
 - Added safer remote request handling and improved administrative safeguards.
 
-## [2.0.1] — 2026-08-27
+## 2.0.1 — 2026-08-27 (historical)
 
 ### Added
 
@@ -66,14 +66,14 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) an
 
 - Fixed the WordPress View Details modal so the project uses Joynal Abdin and devjoynal.com metadata instead of unrelated directory branding.
 
-## [2.0.0] — 2026-08-27
+## 2.0.0 — 2026-08-27 (historical)
 
 ### Added
 
 - Introduced the professional admin interface for controlled WordPress Core version management.
 - Added the initial branded release and documented staging-first workflow.
 
-## [1.2.6] — 2026-08-27
+## 1.2.6 — 2026-08-27 (historical)
 
 ### Changed
 
@@ -81,8 +81,3 @@ This project follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) an
 
 [Unreleased]: https://github.com/joynalabddin/downgrade-wordpress-plugin/compare/v2.0.4...HEAD
 [2.0.4]: https://github.com/joynalabddin/downgrade-wordpress-plugin/releases/tag/v2.0.4
-[2.0.3]: https://github.com/joynalabddin/downgrade-wordpress-plugin/releases/tag/v2.0.3
-[2.0.2]: https://github.com/joynalabddin/downgrade-wordpress-plugin/releases/tag/v2.0.2
-[2.0.1]: https://github.com/joynalabddin/downgrade-wordpress-plugin/releases/tag/v2.0.1
-[2.0.0]: https://github.com/joynalabddin/downgrade-wordpress-plugin/releases/tag/v2.0.0
-[1.2.6]: https://github.com/joynalabddin/downgrade-wordpress-plugin/releases/tag/v1.2.6
