@@ -31,7 +31,7 @@ After activation, open **Settings → DevJoynal Downgrade**, enter an exact Word
 | Safer update filter | Avoids mutating missing or malformed update objects and preserves the original update response when no target is configured. | Improves resilience on modern WordPress installations. |
 | Author panel | Displays the supplied Joynal Abdin portrait and links to `devjoynal.com`. | Provides clear project ownership inside the admin screen. |
 | Responsive admin UI | Uses scoped styles and adapts the settings layout for smaller screens. | Makes the workflow more comfortable on laptops and tablets. |
-| View details override | Supplies project-owned plugin-information metadata for the `devjoynal-downgrade` slug. | Prevents the details modal from showing unrelated old directory branding. |
+| View details override | Supplies project-owned plugin-information metadata for the `downgrade` slug. | Prevents the details modal from showing unrelated old directory branding. |
 | Safe diagnostics requests | Uses WordPress safe remote requests, disables automatic redirects, and caches reachability checks briefly. | Reduces SSRF exposure and repeated network overhead. |
 | Strict checkbox sanitization | Accepts only explicit enabled values. | Avoids malformed settings state. |
 
