@@ -1,4 +1,6 @@
-# DevJoynal Downgrade — Controlled WordPress Core Version Management
+# DevJoynal Downgrade
+
+## Controlled WordPress Core version management for staging, compatibility testing, and planned rollback
 
 [![CI](https://github.com/joynalabddin/downgrade-wordpress-plugin/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/joynalabddin/downgrade-wordpress-plugin/actions/workflows/ci.yml)
 [![Latest release](https://img.shields.io/github/v/release/joynalabddin/downgrade-wordpress-plugin?display_name=tag&sort=semver)](https://github.com/joynalabddin/downgrade-wordpress-plugin/releases/latest)
@@ -7,199 +9,166 @@
 [![Requires PHP](https://img.shields.io/badge/PHP_required-7.4%2B-777bb4.svg)](https://www.php.net/supported-versions.php)
 [![License](https://img.shields.io/badge/license-GPLv2%20or%20later-blue.svg)](https://www.gnu.org/licenses/gpl-2.0.html)
 
-**DevJoynal Downgrade** is a focused WordPress plugin for administrators who need to pin WordPress Core to an exact release and review that release through the native WordPress Core Update workflow. It is designed for controlled WordPress rollback, compatibility testing, reinstall workflows, staging recovery, and planned Core upgrades where a specific WordPress version is required.
+**DevJoynal Downgrade** is an administrator-focused WordPress plugin for presenting a selected WordPress Core release through the native **Update Core** workflow. It is built for controlled version pinning, staging validation, plugin and theme compatibility testing, reinstall workflows, hosting migrations, and documented rollback preparation.
 
-> **Important:** A WordPress Core downgrade or rollback can affect files, the database, themes, plugins, extensions, scheduled jobs, and server requirements. Create and verify a complete files-and-database backup, test on staging first, and maintain a documented recovery plan before changing versions.
+> **Safety first:** A WordPress Core version change can affect files, the database, themes, plugins, scheduled jobs, integrations, server requirements, and site availability. Create and verify a complete files-and-database backup, test on staging, and maintain a recovery plan before changing Core.
 
-## Quick overview
+## At a glance
 
 | Item | Details |
 |---|---|
-| Plugin name | DevJoynal Downgrade |
-| Current release | 2.0.4 |
+| Current release | [v2.0.4](https://github.com/joynalabddin/downgrade-wordpress-plugin/releases/tag/v2.0.4) |
 | Plugin slug | `devjoynal-downgrade` |
-| Primary use | Controlled WordPress Core version pinning and rollback preparation |
 | WordPress requirement | 5.8 or later |
 | Tested target | WordPress 7.1 staging environment |
 | PHP requirement | 7.4 or later |
-| PHP 8.4 status | Target environment; verify on the actual host before production use |
+| PHP 8.4 | Project target; verify the actual host on staging |
 | Required capability | `update_core` |
-| Author | [Joynal Abdin](https://devjoynal.com) |
-| Project website | [devjoynal.com](https://devjoynal.com) |
 | License | [GPL-2.0-or-later](https://www.gnu.org/licenses/gpl-2.0.html) |
+| Author | [Joynal Abdin](https://devjoynal.com) |
+| Website | [devjoynal.com](https://devjoynal.com) |
 
-## What problem does DevJoynal Downgrade solve?
+## What the plugin does
 
-WordPress Core version changes are sometimes necessary when a theme, plugin, hosting stack, PHP runtime, or staging environment requires a known release. The native WordPress update screen is the correct place to review and run the update, but it normally presents the releases selected by WordPress’s update service. DevJoynal Downgrade adds a controlled administrator setting that changes the Core update information shown to WordPress for a specific target version.
+WordPress normally presents Core releases selected by its update service. DevJoynal Downgrade adds a controlled administrator setting that changes the update information WordPress receives for a specific target release. The administrator can then review the effective package URL, inspect diagnostics, and continue through the familiar native **Update Core** page.
 
-The plugin does not silently replace WordPress Core, bypass permissions, or pretend that an older release is automatically safe. It gives an authorized administrator a visible version pin, an effective package URL, diagnostics, and a link back to the native **Update Core** page. The administrator remains responsible for validating the backup, package, compatibility plan, and recovery path.
+The plugin does **not** silently replace WordPress Core, bypass WordPress permissions, or guarantee that an older release is safe for a particular site. It is a version-management aid, not a backup system, malware scanner, security-update replacement, or universal compatibility guarantee.
 
-## Common use cases
+## Key capabilities
 
-| Use case | How the plugin helps |
+| Capability | Why it matters |
 |---|---|
-| Plugin or theme compatibility testing | Pin a staging site to a known WordPress release while testing the rest of the stack. |
-| Controlled WordPress rollback | Present a selected older Core package through the normal update flow after a verified backup and incident plan. |
-| Reinstalling a specific Core release | Use the release URL generated by WordPress distribution conventions and review it before execution. |
-| Hosting or PHP migration | Reproduce a known WordPress/PHP combination on staging before moving production traffic. |
-| Temporary version pin | Keep a site on a tested release while a blocking compatibility issue is investigated, then remove the pin. |
-| Language-specific package testing | Use the locale-aware official package URL or a trusted custom package source. |
-
-## Features
-
-| Feature | Description | Operational value |
-|---|---|---|
-| Exact WordPress version pinning | Accepts structured releases such as `7.0.6` and rejects malformed values. | Reduces accidental or ambiguous version selection. |
-| Native WordPress update workflow | Modifies the Core update response instead of implementing a separate updater. | Keeps review and execution inside the familiar WordPress Core screen. |
-| Locale-aware official package URL | Builds the official WordPress distribution URL for the selected release and detected locale. | Makes the default source predictable for localized installations. |
-| Optional custom ZIP URL | Allows an administrator to use a trusted HTTP(S) WordPress package source. | Supports controlled mirrors and special staging environments. |
-| SHA-256 package verification | Verifies a configured 64-character digest before handing a custom package to the WordPress upgrader. | Detects unexpected package changes before unpacking. |
-| Locale-aware update selection | Selects the best matching update entry instead of assuming the first array element is always correct. | Improves behavior when WordPress returns multiple update entries. |
-| Alternate package cleanup | Clears partial, rollback, bundled, and no-content package alternatives after the target is selected. | Makes the configured full package more deterministic. |
-| Safe package diagnostics | Uses safe HTTP requests, bounded probes, redirect blocking, GET fallback, status reporting, and transient caching. | Helps an administrator identify an unreachable or obviously invalid package before updating. |
-| Reset control | Clears the target version, custom URL, and checksum after a nonce and capability check. | Provides a documented return to the standard update channel. |
-| Settings API integration | Uses WordPress settings registration and sanitization callbacks. | Aligns configuration with WordPress administration conventions. |
-| Responsive admin screen | Provides a scoped settings layout, backup warning, diagnostics table, and author panel. | Keeps a high-risk workflow readable on common admin screens. |
-| Project-owned details metadata | Supplies DevJoynal branding for the plugin information response for the project slug. | Prevents unrelated legacy branding in the local details modal. |
-
-## Requirements and compatibility
-
-The current release declares **WordPress 5.8 or later** and **PHP 7.4 or later**. The project has been tested against a WordPress 7.1 staging environment. PHP 8.4 is a target environment from the project requirements and should be verified on the real host with its extensions, filesystem permissions, web server configuration, database version, and update method.
-
-The plugin requires an administrator with the WordPress `update_core` capability. On multisite, confirm whether the site-level settings and network administration policy match the intended workflow. Test the process on a staging network before using it on production.
+| Exact version pinning | Accepts structured releases such as `7.0.6` and rejects malformed or ambiguous values. |
+| Native Core workflow | Keeps review and execution inside the normal WordPress update screen rather than implementing a separate silent updater. |
+| Locale-aware package selection | Builds the official package URL for the selected release and detected site locale. |
+| Trusted custom ZIP URL | Supports controlled mirrors and staging sources when explicitly enabled by an authorized administrator. |
+| Optional SHA-256 verification | Compares a configured 64-character digest before a custom package is handed to the Core upgrader. |
+| Locale-aware update matching | Selects the best matching update entry when WordPress returns multiple entries. |
+| Alternate package cleanup | Clears partial, rollback, bundled, and no-content alternatives after a target is selected. |
+| Bounded diagnostics | Uses safe WordPress HTTP requests, redirect blocking, status reporting, and short transient caching. |
+| Reset control | Clears the version pin, custom URL, and checksum after authorization. |
+| WordPress Settings API | Uses WordPress settings registration, sanitization, nonces, capabilities, and contextual escaping. |
+| Administrator UI | Provides a responsive settings screen with backup guidance, diagnostics, and project-owned metadata. |
 
 ## Installation
 
-### Install the release ZIP
+### Install the latest release ZIP
 
-1. Download `devjoynal-downgrade-2.0.4.zip` from the [GitHub v2.0.4 release](https://github.com/joynalabddin/downgrade-wordpress-plugin/releases/tag/v2.0.4).
+1. Download the current ZIP from the [GitHub Releases page](https://github.com/joynalabddin/downgrade-wordpress-plugin/releases).
 2. In WordPress, open **Plugins → Add New Plugin → Upload Plugin**.
 3. Select the ZIP, choose **Install Now**, and activate **DevJoynal Downgrade**.
-4. Open **Settings → DevJoynal Downgrade** and confirm that the settings page loads and displays the current WordPress version.
+4. Open **Settings → DevJoynal Downgrade** and confirm that the settings screen loads.
+5. Create and verify a complete files-and-database backup before configuring a target release.
 
-### Install manually
+### Manual installation
 
-Extract the release ZIP and upload the `devjoynal-downgrade` directory to `/wp-content/plugins/`. Activate the plugin from **Plugins → Installed Plugins**. Do not rename the plugin directory after installation; the expected directory is `devjoynal-downgrade`.
+Extract the release archive and upload the `devjoynal-downgrade` directory to `/wp-content/plugins/`. Activate the plugin from **Plugins → Installed Plugins**. Keep the directory name as `devjoynal-downgrade`.
 
-### Verify the release package
+### Verify the release archive
 
-The release includes `devjoynal-downgrade-2.0.4.sha256`. Download the ZIP and checksum manifest into the same directory, then run:
+The v2.0.4 release includes a SHA-256 manifest. Place the ZIP and manifest in the same directory and run:
 
 ```bash
 sha256sum -c devjoynal-downgrade-2.0.4.sha256
 ```
 
-A successful verification reports:
+A valid result is:
 
 ```text
 devjoynal-downgrade-2.0.4.zip: OK
 ```
 
-## Configuration reference
+## Configuration
 
-After activation, open **Settings → DevJoynal Downgrade**. Enter the exact WordPress target release, review the diagnostics result, and save the settings. The version field is intentionally strict so values such as `7.0.6` are accepted while malformed or ambiguous values are rejected.
+Open **Settings → DevJoynal Downgrade**, enter the exact target release, save the setting, and review the effective package URL and diagnostic status. Then use **Open Update Core** to review the release in the native WordPress workflow.
 
-| Setting or display | Meaning |
+| Setting | Behavior |
 |---|---|
-| Target WordPress version | The exact Core release that the plugin will present to the native update workflow. Leave empty to disable the pin. |
-| Effective package URL | The official locale-aware URL or the enabled custom URL that WordPress will use. |
-| Custom package URL | An optional HTTP(S) URL for a trusted WordPress ZIP. It is disabled unless explicitly enabled. |
-| Expected SHA-256 checksum | An optional 64-character digest for the custom package. A mismatch stops the package before Core unpacks it. |
-| Diagnostics status | A bounded reachability and response check for the effective package URL. It is not a complete archive authenticity test. |
-| Reset all settings | Clears the version pin, custom URL, and checksum after authorization. |
+| Target WordPress version | Pins the exact Core release shown to the native update workflow. Leave empty to disable the pin. |
+| Effective package URL | Displays the official locale-aware URL or explicitly enabled custom URL. |
+| Custom package URL | Accepts a trusted HTTP(S) WordPress ZIP source when the option is enabled. |
+| Expected SHA-256 checksum | Rejects a custom package when its downloaded bytes do not match the configured digest. |
+| Diagnostics status | Reports bounded reachability and basic response characteristics; it is not a full authenticity or compatibility test. |
+| Reset all settings | Clears the target version, custom URL, and checksum after capability and nonce validation. |
 
-## Safe WordPress Core rollback workflow
+## Recommended rollback workflow
 
-A professional rollback process begins before the plugin is activated. Record the current WordPress version, PHP version, database version, active theme, active plugins, server environment, scheduled integrations, and recovery procedure. Create a full backup of the files and database, then verify that the backup can actually be restored.
+Treat every Core change as a controlled maintenance event. Record the current WordPress and PHP versions, database and server details, active theme and plugins, scheduled integrations, and recovery procedure. Verify that the files-and-database backup can be restored before proceeding.
 
-On a staging copy, activate the plugin and open **Settings → DevJoynal Downgrade**. Enter the exact target version and save. Review the displayed locale, effective package URL, HTTP status, and diagnostic message. Follow **Open Update Core**, confirm that WordPress is offering the intended target release, and begin the change only after the package and recovery plan have been reviewed.
+Test on a staging copy first. Configure the target release, review the locale and package URL, inspect diagnostics, open the native **Update Core** screen, and confirm that WordPress offers the intended release. After the change, test the public site, authentication, administrator screens, editor, forms, media uploads, REST API, cron, email, ecommerce, search, cache, payment integrations, and other business-critical paths. Review **Tools → Site Health** and server logs.
 
-After the change, test the public site, login, administrator screens, block editor or classic editor, forms, media uploads, REST API, cron jobs, email delivery, ecommerce flows, search, caching, payment integrations, and other business-critical paths. Review **Tools → Site Health** and server error logs. If the target is no longer required, empty the version field and save, use **Reset all Downgrade settings**, or deactivate the plugin to return to the normal update path.
+When the target is no longer required, empty the target field and save, use the reset control, or deactivate the plugin to return to the normal update channel. Maintain a documented return path to a supported WordPress release.
 
 ## Custom package security model
 
-The custom package URL is disabled by default and should be used only for a trusted, controlled source. A URL can be syntactically valid and reachable while still serving the wrong file. For that reason, production workflows should provide the package’s 64-character SHA-256 digest and obtain that digest through a trusted release channel.
+Custom package URLs are disabled by default and should be used only for a trusted, controlled source. A reachable URL can still serve the wrong file. For production or sensitive staging workflows, provide the package’s SHA-256 digest through a trusted release channel.
 
-A matching SHA-256 digest proves that the downloaded file matches the expected bytes. It does not prove that the expected digest itself came from a trustworthy source, and it does not replace archive-structure or compatibility review. The next planned security improvement is safe ZIP structure validation that checks for the expected WordPress package layout and rejects path traversal before extraction.
-
-The diagnostics screen is deliberately limited. It uses safe WordPress HTTP functions, blocks automatic redirects, applies a bounded response probe, rejects obvious HTML responses, reports the HTTP result, and caches the result briefly. A successful diagnostic means the endpoint responded acceptably to the probe; it is not a guarantee that the entire package is genuine or compatible.
+A matching digest proves that the downloaded bytes match the expected bytes. It does not prove that the expected digest came from a trusted source, and it does not replace archive-structure, malware, compatibility, or backup review. The diagnostics screen is intentionally limited and is not a complete archive-authenticity test.
 
 ## Security and privacy
 
-DevJoynal Downgrade is designed for administrator-controlled use. It contains no advertising, telemetry, user tracking, or third-party runtime dependency. It does not collect or transmit site content, user profiles, or usage analytics. Diagnostics make outbound requests only when the administrator views the plugin settings screen, and only to the effective package URL generated or configured for the selected release.
+The plugin is designed for administrator-controlled use. It contains no advertising, telemetry, analytics, user tracking, or third-party runtime dependency. It does not collect or transmit site content, user profiles, or usage analytics. When an administrator views the settings screen, diagnostics may request the effective official or explicitly configured custom package URL.
 
-Security controls include capability checks, Settings API validation, nonce-protected reset handling, contextual escaping, safe HTTP requests, redirect blocking, bounded diagnostics, transient caching, and optional checksum verification. The plugin cannot protect a site from a compromised administrator account, an untrusted custom package source, an invalid checksum supplied by an attacker, or an unverified backup.
+Security controls include capability checks, Settings API validation, nonce-protected reset handling, contextual escaping, safe HTTP requests, redirect blocking, bounded diagnostics, transient caching, strict version validation, and optional checksum verification. Never include passwords, private URLs, database dumps, backup archives, or personal data in a public issue.
 
 ## Troubleshooting
 
-| Symptom | Recommended checks |
+| Symptom | Checks |
 |---|---|
-| The target release is not shown | Confirm that the version uses the expected numeric format, save the settings again, and refresh the native **Update Core** page. |
-| Diagnostics report an HTTP error | Check DNS, TLS, firewall, hosting egress rules, the package URL, and the remote server’s availability. Test the URL from the staging host rather than only from a desktop browser. |
-| A custom package is rejected | Confirm that the checksum contains exactly 64 hexadecimal characters and was calculated from the same ZIP file being served. |
-| The plugin appears inactive | Confirm activation status, PHP version, filesystem permissions, and the WordPress error log. |
-| WordPress still shows the normal update | Confirm that the target version is saved, the current user has `update_core`, and no other update-management plugin is replacing the same Core transient. |
-| A site behaves incorrectly after rollback | Restore the verified backup or follow the host’s recovery plan, then review database, PHP, theme, plugin, cache, REST, and scheduled-job compatibility. |
-| The settings page is slow | Review the diagnostic cache state and remote endpoint latency. Avoid repeated refreshes and use an explicit staging test before changing the target. |
+| Target release is not shown | Confirm the version format, save again, refresh the native **Update Core** page, and check that the user has `update_core`. |
+| Diagnostics report an HTTP error | Check DNS, TLS, firewall, hosting egress rules, package URL, and remote availability from the staging host. |
+| Custom package is rejected | Recalculate the digest from the exact ZIP being served and confirm it contains exactly 64 hexadecimal characters. |
+| Normal update remains visible | Confirm the target is saved and check whether another update-management plugin is replacing the same update data. |
+| Site behaves incorrectly after rollback | Restore the verified backup or follow the host recovery plan; then review database, PHP, theme, plugin, cache, REST, and scheduled-job compatibility. |
 
-## WordPress.org submission structure
-
-This repository contains both GitHub documentation and the files intended for an official WordPress.org plugin submission. WordPress.org uses `readme.txt` and the main plugin PHP header for directory metadata; GitHub uses this `README.md` for repository visitors and maintainers. The two files serve different purposes and should be kept consistent where their information overlaps.
+## Repository map
 
 | Path | Purpose |
 |---|---|
-| `devjoynal-downgrade/devjoynal-downgrade.php` | Main plugin file, plugin header, hooks, settings, diagnostics, and update behavior. |
-| `devjoynal-downgrade/readme.txt` | WordPress.org-facing metadata, installation, FAQ, screenshots, and current changelog. |
-| `devjoynal-downgrade/assets/` | Author image and package assets. |
+| `devjoynal-downgrade/` | WordPress.org-ready plugin package. |
+| `devjoynal-downgrade/devjoynal-downgrade.php` | Main plugin file, hooks, settings, diagnostics, and update behavior. |
+| `devjoynal-downgrade/readme.txt` | WordPress.org-facing metadata, installation, FAQ, screenshots, and changelog. |
+| `devjoynal-downgrade/assets/` | Plugin assets, including the author image. |
 | `devjoynal-downgrade/languages/` | Translation template and compiled translations. |
-| `devjoynal-downgrade/screenshot-*.png` | Screenshots referenced by the WordPress.org readme. |
-| `CHANGELOG.md` | Complete GitHub release history, including historical releases no longer published as GitHub Release objects. |
-| `REFACTORING_ROADMAP.md` | Planned security, performance, testing, multisite, and maintainability work. |
+| `.github/workflows/ci.yml` | PHP linting, metadata validation, Markdown checks, and package smoke tests. |
+| `CHANGELOG.md` | Release history. |
+| `REFACTORING_ROADMAP.md` | Planned security, performance, testing, and maintainability improvements. |
 | `SECURITY_FIX_REPORT.md` | v2.0.4 audit-remediation summary. |
+| `docs/WIKI_GUIDE_AND_BADGES.md` | Documentation architecture and README badge guide. |
+| `LICENSE` | Complete GNU GPLv2 license text. |
+| `COPYRIGHT` | Joynal Abdin copyright and project ownership notice. |
 
-WordPress.org’s official guidance states that `readme.txt` controls the directory-facing page, while important requirements such as the plugin version and PHP requirement are read from the main plugin file. Review the official [Plugin Readmes handbook](https://developer.wordpress.org/plugins/wordpress-org/how-your-readme-txt-works/) and [Detailed Plugin Guidelines](https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/) before submission.
+## Development and validation
 
-## Development and release validation
-
-The repository is intentionally self-contained and has no third-party runtime dependency. Before preparing a release, run syntax, diff, package, and documentation checks. At minimum:
+Before opening a pull request or publishing a release, run the local checks relevant to your change:
 
 ```bash
 php -l devjoynal-downgrade/devjoynal-downgrade.php
 git diff --check
-sha256sum -c devjoynal-downgrade-2.0.4.sha256
 ```
 
-The v2.0.4 release passed PHP syntax validation, diff validation, 12 focused static regression checks, release-root validation, and remote ZIP checksum verification. Syntax checks do not prove that a live WordPress Core update is safe; staging validation remains required.
+GitHub Actions additionally checks PHP syntax on PHP 7.4 and PHP 8.4, plugin metadata, documentation hygiene, package structure, required files, and release archive integrity. A clean syntax check does not prove that a live Core update is safe; staging validation remains required.
 
-The next recommended engineering improvements are documented in [REFACTORING_ROADMAP.md](REFACTORING_ROADMAP.md). The highest priorities are WordPress integration tests, fail-closed checksum policy, safe ZIP structure validation, separation of pure logic from hook callbacks, multisite coverage, and GitHub Actions for WordPress Coding Standards and PHP static analysis.
+## WordPress.org documentation
 
-## Contribution guidelines
+This repository includes a WordPress.org-ready `readme.txt`, screenshots, GPL-compatible code and assets, plugin metadata, and an installable package structure. See the [WordPress.org submission checklist](docs/WORDPRESS_ORG_SUBMISSION_CHECKLIST.md) and the official [Plugin Handbook](https://developer.wordpress.org/plugins/wordpress-org/) before submitting.
 
-Bug reports and improvement proposals are welcome through [GitHub Issues](https://github.com/joynalabddin/downgrade-wordpress-plugin/issues). Include the plugin version, WordPress version, PHP version, active update-management plugins, relevant error message, and safe reproduction steps. Do not include passwords, private URLs, database dumps, backup archives, or personally identifiable information.
+## Contributing
 
-Before opening a pull request, keep changes focused, follow WordPress coding conventions, update the relevant documentation, and run the validation commands. Core update behavior must be tested on staging; a clean PHP syntax check alone is not sufficient evidence of compatibility.
+Bug reports and focused improvement proposals are welcome through [GitHub Issues](https://github.com/joynalabddin/downgrade-wordpress-plugin/issues). Include the plugin version, WordPress version, PHP version, active update-management plugins, relevant error message, and safe reproduction steps. Keep pull requests focused, update documentation when behavior changes, follow WordPress coding conventions, and test Core behavior on staging.
 
-## Sustainable discoverability
+## Project and support
 
-This README uses a descriptive project title, natural WordPress Core version-management terminology, clear task-based headings, accurate compatibility details, descriptive links, troubleshooting content, security documentation, and author attribution. These practices help people and search engines understand the repository, but **no README or GitHub repository can guarantee a number-one Google position**.
-
-Sustainable discoverability depends on genuinely useful documentation, original technical explanations, accurate releases, crawlable links, a maintained project website, real user references, and evidence of expertise. Keep [devjoynal.com](https://devjoynal.com) aligned with the repository, link to the release and documentation from relevant pages, publish real case studies without exposing client data, and avoid keyword stuffing, misleading claims, duplicate pages, and artificial links.
-
-## Responsible use
-
-DevJoynal Downgrade is a controlled WordPress Core version-management utility, not a backup system, malware scanner, security update replacement, or universal compatibility guarantee. If an older Core release is required, document the reason, restrict administrative access, monitor the site, schedule a return to a supported release, and keep the recovery path tested.
-
-For professional WordPress security, maintenance, and development services, visit [devjoynal.com](https://devjoynal.com).
+DevJoynal Downgrade is maintained by [Joynal Abdin](https://devjoynal.com). For project documentation, source code, releases, and issue tracking, use this repository. For professional WordPress development and maintenance services, visit [devjoynal.com](https://devjoynal.com).
 
 ## License
 
-DevJoynal Downgrade is distributed under the [GNU General Public License, version 2 or later](https://www.gnu.org/licenses/gpl-2.0.html).
+DevJoynal Downgrade is distributed under the [GNU General Public License, version 2 or later](https://www.gnu.org/licenses/gpl-2.0.html). Copyright remains with Joynal Abdin; the license grants the permissions and imposes the conditions described in `LICENSE`.
 
 ## References
 
 [1]: https://developer.wordpress.org/plugins/wordpress-org/how-your-readme-txt-works/ "WordPress Plugin Handbook — Plugin Readmes"
 [2]: https://developer.wordpress.org/plugins/wordpress-org/detailed-plugin-guidelines/ "WordPress Plugin Handbook — Detailed Plugin Guidelines"
-[3]: https://developer.wordpress.org/apis/security/ "WordPress Developer Resources — Common APIs: Security"
+[3]: https://developer.wordpress.org/apis/security/ "WordPress Developer Resources — Security"
 [4]: https://developer.wordpress.org/plugins/http-api/ "WordPress Plugin Handbook — HTTP API"
-[5]: https://developers.google.com/search/docs/fundamentals/creating-helpful-content "Google Search Central — Creating Helpful, Reliable, People-First Content"
-[6]: https://developers.google.com/search/docs/crawling-indexing/links-crawlable "Google Search Central — Link Best Practices"
+[5]: https://developers.google.com/search/docs/fundamentals/creating-helpful-content "Google Search Central — Helpful Content"
