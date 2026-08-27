@@ -52,21 +52,36 @@ The plugin does **not** silently replace WordPress Core, bypass WordPress permis
 
 ## Installation
 
-### Install the latest release ZIP
+DevJoynal Downgrade changes the WordPress Core update information shown to an authorized administrator. Installation itself does not downgrade WordPress. Configure a target only after the plugin is active, the package source has been reviewed, and the recovery plan has been tested.
 
-1. Download the current ZIP from the [GitHub Releases page](https://github.com/joynalabddin/downgrade-wordpress-plugin/releases).
-2. In WordPress, open **Plugins → Add New Plugin → Upload Plugin**.
-3. Select the ZIP, choose **Install Now**, and activate **DevJoynal Downgrade**.
-4. Open **Settings → DevJoynal Downgrade** and confirm that the settings screen loads.
-5. Create and verify a complete files-and-database backup before configuring a target release.
+### Before you install
 
-### Manual installation
+Confirm that the site meets the [declared requirements](#at-a-glance): WordPress 5.8 or later, PHP 7.4 or later, and an administrator with the `update_core` capability. For the project target environment, verify WordPress 7.1 and PHP 8.4 on the actual staging host rather than assuming that every hosting stack behaves identically.
 
-Extract the release archive and upload the `devjoynal-downgrade` directory to `/wp-content/plugins/`. Activate the plugin from **Plugins → Installed Plugins**. Keep the directory name as `devjoynal-downgrade`.
+Create a complete backup of both the WordPress files and database. Verify that the backup is restorable, record the current WordPress and PHP versions, and note the active theme, plugins, scheduled integrations, and hosting recovery procedure. For a production site, perform the first installation and version test on staging.
+
+### Install from the release ZIP
+
+1. Open the [v2.0.4 GitHub release](https://github.com/joynalabddin/downgrade-wordpress-plugin/releases/tag/v2.0.4) and download `devjoynal-downgrade-2.0.4.zip`.
+2. Optionally download `devjoynal-downgrade-2.0.4.sha256` and verify the archive using the command below.
+3. In the WordPress dashboard, open **Plugins → Add New Plugin → Upload Plugin**.
+4. Select the ZIP file, choose **Install Now**, and wait for WordPress to finish unpacking the plugin.
+5. Select **Activate Plugin**. If WordPress reports an existing version, use the update path and confirm that the package comes from this project’s release page.
+6. Open **Plugins → Installed Plugins**, confirm that **DevJoynal Downgrade** is active, and review the plugin version.
+7. Open **Settings → DevJoynal Downgrade**. Confirm that the settings page loads, shows the current WordPress version, and displays no unexpected diagnostic error.
+8. Do not enter a target release until the backup, staging test, package URL, and recovery plan have been reviewed.
+
+### Manual installation through SFTP or hosting file manager
+
+1. Download the release ZIP and verify its checksum when a manifest is available.
+2. Extract the archive locally. The package must contain one top-level directory named `devjoynal-downgrade`.
+3. Upload that directory to `/wp-content/plugins/` using SFTP or the host’s file manager. Do not upload only the PHP file and do not rename the directory.
+4. In the dashboard, open **Plugins → Installed Plugins** and activate **DevJoynal Downgrade**.
+5. Confirm that `devjoynal-downgrade/devjoynal-downgrade.php` exists and that the settings page is available under **Settings → DevJoynal Downgrade**.
 
 ### Verify the release archive
 
-The v2.0.4 release includes a SHA-256 manifest. Place the ZIP and manifest in the same directory and run:
+The v2.0.4 release includes a SHA-256 manifest. Place the ZIP and manifest in the same local directory and run:
 
 ```bash
 sha256sum -c devjoynal-downgrade-2.0.4.sha256
@@ -77,6 +92,22 @@ A valid result is:
 ```text
 devjoynal-downgrade-2.0.4.zip: OK
 ```
+
+On Windows, calculate the SHA-256 value with PowerShell and compare it with the value in the manifest:
+
+```powershell
+Get-FileHash .\\devjoynal-downgrade-2.0.4.zip -Algorithm SHA256
+```
+
+### Post-install verification
+
+After activation, check that the plugin settings page is accessible only to an authorized administrator, the target field is empty by default, the diagnostics area loads, and the native **Update Core** link opens the expected WordPress screen. On staging, configure a known target release and confirm the displayed package URL and locale before taking any update action.
+
+If the settings page is missing, confirm activation status, PHP compatibility, filesystem permissions, and the WordPress error log. If WordPress reports a package or checksum problem, stop the update, confirm the exact ZIP and trusted digest, and restore from the verified backup if the site has already been changed.
+
+### Remove or disable the plugin safely
+
+To stop version pinning while keeping the plugin installed, empty the target version field and save, or use **Reset all settings**. Refresh the native **Update Core** screen and confirm that the normal update channel has returned. Deactivate the plugin only after the pin has been cleared or when following the site’s documented maintenance procedure. Delete the plugin from **Plugins → Installed Plugins** only after confirming that no target configuration is still required.
 
 ## Configuration
 
