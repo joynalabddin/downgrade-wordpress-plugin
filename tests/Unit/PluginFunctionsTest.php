@@ -16,7 +16,7 @@ final class PluginFunctionsTest extends TestCase {
 	}
 
 	public function test_valid_version_is_preserved(): void {
-		$this->assertSame( '7.0.6', downgrade_sanitize_version( ' 7.0.6 ' ) );
+		$this->assertSame( '7.0.4', downgrade_sanitize_version( ' 7.0.4 ' ) );
 		$this->assertCount( 0, $GLOBALS['wpdg_test_settings_errors'] );
 	}
 
@@ -29,8 +29,8 @@ final class PluginFunctionsTest extends TestCase {
 
 	public function test_valid_https_url_is_preserved(): void {
 		$this->assertSame(
-			'https://downloads.example.test/wordpress-7.0.6.zip',
-			downgrade_sanitize_url( 'https://downloads.example.test/wordpress-7.0.6.zip' )
+			'https://downloads.example.test/wordpress-7.0.4.zip',
+			downgrade_sanitize_url( 'https://downloads.example.test/wordpress-7.0.4.zip' )
 		);
 	}
 
@@ -60,19 +60,19 @@ final class PluginFunctionsTest extends TestCase {
 
 	public function test_release_url_is_locale_aware(): void {
 		$GLOBALS['wpdg_test_locale'] = 'en_US';
-		$this->assertSame( 'https://downloads.wordpress.org/release/wordpress-7.0.6.zip', downgrade_get_release_url( '7.0.6' ) );
+		$this->assertSame( 'https://downloads.wordpress.org/release/wordpress-7.0.4.zip', downgrade_get_release_url( '7.0.4' ) );
 
 		$GLOBALS['wpdg_test_locale'] = 'de_DE';
-		$this->assertSame( 'https://downloads.wordpress.org/release/de_DE/wordpress-7.0.6.zip', downgrade_get_release_url( '7.0.6' ) );
+		$this->assertSame( 'https://downloads.wordpress.org/release/de_DE/wordpress-7.0.4.zip', downgrade_get_release_url( '7.0.4' ) );
 	}
 
 	public function test_effective_url_uses_custom_url_only_when_enabled(): void {
-		$GLOBALS['wpdg_test_options'][ DOWNGRADE_OPTION_VERSION ] = '7.0.6';
-		$GLOBALS['wpdg_test_options'][ DOWNGRADE_OPTION_URL ] = 'https://mirror.example.test/wordpress-7.0.6.zip';
+		$GLOBALS['wpdg_test_options'][ DOWNGRADE_OPTION_VERSION ] = '7.0.4';
+		$GLOBALS['wpdg_test_options'][ DOWNGRADE_OPTION_URL ] = 'https://mirror.example.test/wordpress-7.0.4.zip';
 
-		$this->assertSame( 'https://downloads.wordpress.org/release/wordpress-7.0.6.zip', downgrade_get_effective_url() );
+		$this->assertSame( 'https://downloads.wordpress.org/release/wordpress-7.0.4.zip', downgrade_get_effective_url() );
 
 		$GLOBALS['wpdg_test_options'][ DOWNGRADE_OPTION_CUSTOM_URL ] = true;
-		$this->assertSame( 'https://mirror.example.test/wordpress-7.0.6.zip', downgrade_get_effective_url() );
+		$this->assertSame( 'https://mirror.example.test/wordpress-7.0.4.zip', downgrade_get_effective_url() );
 	}
 }

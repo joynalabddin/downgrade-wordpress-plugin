@@ -17,13 +17,13 @@
 
 ## What the plugin does
 
-After activation, open **Settings → DevJoynal Downgrade**, enter an exact WordPress release such as `7.0.6`, and save. The plugin changes the update information presented to WordPress so that the selected release is offered through the normal Core Update screen. WordPress downloads the release ZIP from the official WordPress distribution endpoint unless an administrator deliberately enables the custom download URL option.
+After activation, open **Settings → DevJoynal Downgrade**, enter an exact WordPress release such as `7.0.4`, and save. The plugin changes the update information presented to WordPress so that the selected release is offered through the normal Core Update screen. WordPress downloads the release ZIP from the official WordPress distribution endpoint unless an administrator deliberately enables the custom download URL option.
 
 ### Professional features in 2.0.4
 
 | Feature | What it does | Operational benefit |
 |---|---|---|
-| Exact version pinning | Accepts structured versions such as `7.0.6` and rejects malformed input. | Reduces configuration mistakes. |
+| Exact version pinning | Accepts structured versions such as `7.0.4` and rejects malformed input. | Reduces configuration mistakes. |
 | Official release URL builder | Generates a locale-aware WordPress download URL. | Keeps the default path predictable. |
 | Custom URL opt-in | Allows a trusted administrator to use a language-specific or controlled ZIP source. | Supports controlled environments while making the risk explicit. |
 | Diagnostics panel | Shows effective URL, reachability result, HTTP status, plugin version, locale, and current WordPress version. | Makes pre-update review easier. |

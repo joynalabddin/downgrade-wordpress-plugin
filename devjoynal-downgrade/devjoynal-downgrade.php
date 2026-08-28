@@ -103,7 +103,7 @@ function downgrade_sanitize_version( $value ) {
 		return '';
 	}
 	if ( ! preg_match( '/^\d+(?:\.\d+){1,2}$/', $value ) ) {
-		add_settings_error( 'wpdg_messages', 'invalid_version', __( 'Enter a valid WordPress version such as 7.0.6.', 'devjoynal-downgrade' ), 'error' );
+		add_settings_error( 'wpdg_messages', 'invalid_version', __( 'Enter a valid WordPress version such as 7.0.4.', 'devjoynal-downgrade' ), 'error' );
 		return get_option( DOWNGRADE_OPTION_VERSION, '' );
 	}
 	return $value;
@@ -439,13 +439,13 @@ function downgrade_render_settings_page() {
 				<form method="post" action="options.php">
 					<?php settings_fields( 'wpdg-settings-group' ); ?>
 					<table class="form-table" role="presentation">
-						<tr><th scope="row"><label for="wpdg_specific_version_name"><?php esc_html_e( 'Target WordPress version', 'devjoynal-downgrade' ); ?></label></th><td><input class="regular-text" id="wpdg_specific_version_name" name="wpdg_specific_version_name" type="text" inputmode="decimal" pattern="\d+(\.\d+){1,2}" placeholder="<?php echo esc_attr( $wp_version ); ?>" value="<?php echo esc_attr( $target ); ?>" /><p class="description"><?php esc_html_e( 'Use an exact release, for example 7.0.6. Leave empty to disable the pin.', 'devjoynal-downgrade' ); ?></p></td></tr>
+						<tr><th scope="row"><label for="wpdg_specific_version_name"><?php esc_html_e( 'Target WordPress version', 'devjoynal-downgrade' ); ?></label></th><td><input class="regular-text" id="wpdg_specific_version_name" name="wpdg_specific_version_name" type="text" inputmode="decimal" pattern="\d+(\.\d+){1,2}" placeholder="<?php echo esc_attr( $wp_version ); ?>" value="<?php echo esc_attr( $target ); ?>" /><p class="description"><?php esc_html_e( 'Use an exact release, for example 7.0.4. Leave empty to disable the pin.', 'devjoynal-downgrade' ); ?></p></td></tr>
 						<tr><th scope="row"><?php esc_html_e( 'Current WordPress version', 'devjoynal-downgrade' ); ?></th><td><strong><?php echo esc_html( $wp_version ); ?></strong></td></tr>
 						<tr><th scope="row"><?php esc_html_e( 'Detected locale', 'devjoynal-downgrade' ); ?></th><td><?php echo esc_html( determine_locale() ); ?></td></tr>
 					</table>
 					<h2><?php esc_html_e( 'Optional custom package URL', 'devjoynal-downgrade' ); ?></h2>
 					<p><input type="hidden" name="wpdg_edit_download_url" value="0" /><label><input type="checkbox" name="wpdg_edit_download_url" value="1" <?php checked( $custom_enabled ); ?> /> <?php esc_html_e( 'Use a custom HTTP(S) WordPress ZIP URL', 'devjoynal-downgrade' ); ?></label></p>
-					<p><input class="large-text" name="wpdg_download_url" type="url" placeholder="https://downloads.wordpress.org/release/wordpress-7.0.6.zip" value="<?php echo esc_attr( $custom_url ); ?>" /></p>
+					<p><input class="large-text" name="wpdg_download_url" type="url" placeholder="https://downloads.wordpress.org/release/wordpress-7.0.4.zip" value="<?php echo esc_attr( $custom_url ); ?>" /></p>
 					<p><label for="wpdg_download_sha256"><?php esc_html_e( 'Expected SHA-256 checksum (recommended for custom packages)', 'devjoynal-downgrade' ); ?></label><br><input class="large-text code" id="wpdg_download_sha256" name="wpdg_download_sha256" type="text" inputmode="text" pattern="[a-fA-F0-9]{64}" value="<?php echo esc_attr( $sha256 ); ?>" placeholder="64-character SHA-256 digest" /></p>
 					<p class="description"><?php esc_html_e( 'When a checksum is provided, the custom package is rejected if its SHA-256 digest does not match. Use a trusted source and test on staging first.', 'devjoynal-downgrade' ); ?></p>
 					<?php submit_button( __( 'Save settings', 'devjoynal-downgrade' ) ); ?>

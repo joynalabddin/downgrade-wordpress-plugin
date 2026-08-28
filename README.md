@@ -38,7 +38,7 @@ The plugin does **not** silently replace WordPress Core, bypass WordPress permis
 
 | Capability | Why it matters |
 |---|---|
-| Exact version pinning | Accepts structured releases such as `7.0.6` and rejects malformed or ambiguous values. |
+| Exact version pinning | Accepts structured releases such as `7.0.4` and rejects malformed or ambiguous values. |
 | Native Core workflow | Keeps review and execution inside the normal WordPress update screen rather than implementing a separate silent updater. |
 | Locale-aware package selection | Builds the official package URL for the selected release and detected site locale. |
 | Trusted custom ZIP URL | Supports controlled mirrors and staging sources when explicitly enabled by an authorized administrator. |

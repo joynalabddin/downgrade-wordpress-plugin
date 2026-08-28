@@ -13,7 +13,7 @@ DevJoynal Downgrade pins WordPress Core to an exact release for controlled rollb
 
 DevJoynal Downgrade is a WordPress Core version management plugin for administrators who need to review a specific WordPress release through the native **Update Core** screen. It is useful for staging environments, plugin and theme compatibility testing, controlled rollback preparation, reinstall workflows, hosting migrations, and planned Core upgrades.
 
-Enter an exact target version such as `7.0.6`, save the setting, review the effective package URL and diagnostics, and then open the normal WordPress Core Update screen. The plugin changes the Core update information presented to WordPress; it does not silently update WordPress or replace the native upgrader.
+Enter an exact target version such as `7.0.4`, save the setting, review the effective package URL and diagnostics, and then open the normal WordPress Core Update screen. The plugin changes the Core update information presented to WordPress; it does not silently update WordPress or replace the native upgrader.
 
 By default, the plugin builds a locale-aware package URL for the selected release using the official WordPress downloads endpoint. Administrators can optionally enable a trusted custom HTTP(S) ZIP URL and provide a 64-character SHA-256 checksum. When a checksum is configured, the package is verified before WordPress Core unpacks it.
 
@@ -25,7 +25,7 @@ This plugin is not a backup system, malware scanner, security update replacement
 
 ### Features
 
-* Exact WordPress version validation for structured releases such as `7.0.6`.
+* Exact WordPress version validation for structured releases such as `7.0.4`.
 * Native WordPress Core Update workflow instead of a separate silent updater.
 * Locale-aware official WordPress package URL generation.
 * Optional trusted custom ZIP URL for controlled staging or mirror workflows.

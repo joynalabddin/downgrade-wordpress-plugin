@@ -52,7 +52,7 @@ Use a table for settings so the behavior remains easy to audit:
 
 | Setting | Input | Default | Validation | Effect |
 |---|---|---|---|---|
-| Target WordPress version | Version string such as `7.0.6` | Empty | Strict numeric release format | Pins the selected Core update information. |
+| Target WordPress version | Version string such as `7.0.4` | Empty | Strict numeric release format | Pins the selected Core update information. |
 | Enable custom package URL | Checkbox | Disabled | Explicit boolean normalization | Switches from the generated official URL to a configured URL. |
 | Custom package URL | HTTP(S) URL | Empty | URL and scheme validation | Supplies a trusted custom package source. |
 | Expected SHA-256 | 64 hexadecimal characters | Empty | Exact digest format | Rejects a downloaded custom package when the digest differs. |
